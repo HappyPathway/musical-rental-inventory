@@ -1,0 +1,295 @@
+{% extends "inventory/base_inventory.html" %}
+
+{% block inventory_title %}{{ equipment.name }}{% endblock %}
+
+{% block inventory_content %}
+<div class="row">
+    <!-- Equipment Image and QR Code -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            {% if equipment.main_image %}
+            <img src="{{ equipment.main_image.url }}" class="card-img-top" alt="{{ equipment.name }}">
+            {% else %}
+            <div class="card-img-top bg-light d-flex justify-content-center align-items-center" style="height: 300px;">
+                <i class="fas fa-guitar fa-5x text-secondary"></i>
+            </div>
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ equipment.name }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">{{ equipment.brand }}</h6>
+                
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <span class="badge {% if equipment.status == 'available' %}bg-success{% elif equipment.status == 'rented' %}bg-danger{% elif equipment.status == 'maintenance' %}bg-warning{% else %}bg-secondary{% endif %} p-2">
+                        {{ equipment.get_status_display }}
+                    </span>
+                    
+                    {% if equipment.qr_code %}
+                    <a href="{% url 'inventory:qr' pk=equipment.id %}" class="btn btn-sm btn-info">
+                        <i class="fas fa-qrcode"></i> View QR Code
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        {% if user.is_staff %}
+        <div class="mt-3 d-grid gap-2">
+            <a href="{% url 'inventory:edit' pk=equipment.id %}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Edit Equipment
+            </a>
+            <a href="{% url 'inventory:delete' pk=equipment.id %}" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Delete Equipment
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Equipment Details -->
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Equipment Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Category:</strong> {{ equipment.category.name }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Model Number:</strong> {{ equipment.model_number|default:"N/A" }}
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Serial Number:</strong> {{ equipment.serial_number|default:"N/A" }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Purchase Date:</strong> {{ equipment.purchase_date|date:"F j, Y"|default:"N/A" }}
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <strong>Description:</strong>
+                        <p>{{ equipment.description|linebreaks }}</p>
+                    </div>
+                </div>
+                
+                {% if equipment.condition %}
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <strong>Condition:</strong>
+                        <p>{{ equipment.condition|linebreaks }}</p>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if equipment.notes %}
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <strong>Notes:</strong>
+                        <p>{{ equipment.notes|linebreaks }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Rental Pricing -->
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Rental Pricing</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 text-center mb-3 mb-md-0">
+                        <div class="pricing-box p-3 border rounded">
+                            <h6>Daily Rate</h6>
+                            <h3>${{ equipment.rental_price_daily }}</h3>
+                            <small>per day</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center mb-3 mb-md-0">
+                        <div class="pricing-box p-3 border rounded">
+                            <h6>Weekly Rate</h6>
+                            <h3>${{ equipment.rental_price_weekly }}</h3>
+                            <small>per week</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="pricing-box p-3 border rounded">
+                            <h6>Monthly Rate</h6>
+                            <h3>${{ equipment.rental_price_monthly }}</h3>
+                            <small>per month</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="alert alert-info mb-0">
+                            <strong>Security Deposit:</strong> ${{ equipment.deposit_amount }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% if equipment.is_available %}
+        <div class="d-grid gap-2">
+            <a href="{% url 'rentals:create' %}?equipment={{ equipment.id }}" class="btn btn-lg btn-success">
+                <i class="fas fa-shopping-cart"></i> Rent This Equipment
+            </a>
+        </div>
+        {% else %}
+        <div class="alert alert-warning">
+            <strong>This equipment is currently {{ equipment.get_status_display|lower }}</strong> and cannot be rented at this time.
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if user.is_staff %}
+<!-- Maintenance Records -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Maintenance Records</h5>
+                <button class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#addMaintenanceModal">
+                    <i class="fas fa-plus"></i> Add Record
+                </button>
+            </div>
+            <div class="card-body">
+                {% if maintenance_records %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Cost</th>
+                                <th>Performed By</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in maintenance_records %}
+                            <tr>
+                                <td>{{ record.date|date:"M d, Y" }}</td>
+                                <td>{{ record.description }}</td>
+                                <td>${{ record.cost|default:"--" }}</td>
+                                <td>{{ record.performed_by|default:"--" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No maintenance records available for this equipment.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Attachments -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Attachments</h5>
+                <button class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#addAttachmentModal">
+                    <i class="fas fa-plus"></i> Add Attachment
+                </button>
+            </div>
+            <div class="card-body">
+                {% if attachments %}
+                <div class="row">
+                    {% for attachment in attachments %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">{{ attachment.file.name|default:"File" }}</h6>
+                                <p class="card-text small">{{ attachment.description|default:"" }}</p>
+                                <a href="{{ attachment.file.url }}" class="btn btn-sm btn-primary" target="_blank">View File</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No attachments available for this equipment.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Maintenance Record Modal -->
+<div class="modal fade" id="addMaintenanceModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Maintenance Record</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'inventory:add_maintenance' pk=equipment.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="maintenance_date" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="maintenance_date" name="date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="maintenance_description" class="form-label">Description</label>
+                        <textarea class="form-control" id="maintenance_description" name="description" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="maintenance_cost" class="form-label">Cost (optional)</label>
+                        <input type="number" step="0.01" class="form-control" id="maintenance_cost" name="cost">
+                    </div>
+                    <div class="mb-3">
+                        <label for="maintenance_performed_by" class="form-label">Performed By (optional)</label>
+                        <input type="text" class="form-control" id="maintenance_performed_by" name="performed_by">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Attachment Modal -->
+<div class="modal fade" id="addAttachmentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Attachment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'inventory:add_attachment' pk=equipment.id %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="attachment_file" class="form-label">File</label>
+                        <input type="file" class="form-control" id="attachment_file" name="file" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="attachment_description" class="form-label">Description (optional)</label>
+                        <input type="text" class="form-control" id="attachment_description" name="description">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Upload File</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

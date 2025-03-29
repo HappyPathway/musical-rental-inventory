@@ -1,0 +1,96 @@
+{% extends "inventory/base_inventory.html" %}
+
+{% block inventory_title %}QR Code for {{ equipment.name }}{% endblock %}
+
+{% block inventory_head %}
+<style>
+    .qr-container {
+        text-align: center;
+        padding: 20px;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .qr-image {
+        max-width: 300px;
+        margin: 0 auto;
+    }
+    
+    .qr-info {
+        margin-top: 20px;
+    }
+    
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        
+        .qr-print-section, .qr-print-section * {
+            visibility: visible;
+        }
+        
+        .qr-print-section {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+        
+        .no-print {
+            display: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block inventory_content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">QR Code</h5>
+                <button onclick="window.print();" class="btn btn-sm btn-light no-print">
+                    <i class="fas fa-print"></i> Print
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="qr-print-section">
+                    <div class="qr-container">
+                        {% if qr_image_url %}
+                            <img src="{{ qr_image_url }}" alt="QR Code" class="qr-image img-fluid">
+                        {% elif qr_image_base64 %}
+                            <img src="data:image/png;base64,{{ qr_image_base64 }}" alt="QR Code" class="qr-image img-fluid">
+                        {% else %}
+                            <div class="alert alert-warning">No QR code available</div>
+                        {% endif %}
+                        
+                        <div class="qr-info">
+                            <h4>{{ equipment.name }}</h4>
+                            <p>{{ equipment.brand }} {% if equipment.model_number %}({{ equipment.model_number }}){% endif %}</p>
+                            {% if equipment.serial_number %}
+                                <p><small>S/N: {{ equipment.serial_number }}</small></p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="alert alert-info no-print">
+            <h5><i class="fas fa-info-circle"></i> How to use this QR code</h5>
+            <ol>
+                <li>Print this QR code and attach it to the equipment</li>
+                <li>Scan the QR code with your phone to quickly access equipment details</li>
+                <li>Use the equipment scanner in the app to check in/out equipment</li>
+            </ol>
+        </div>
+        
+        <div class="d-grid gap-2 no-print">
+            <a href="{% url 'inventory:detail' pk=equipment.id %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Equipment
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}ROKNSOUND Rental Inventory{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="jumbotron bg-light p-5 rounded">
+            <h1 class="display-4">Musical Equipment Rental</h1>
+            <p class="lead">Rent high-quality musical equipment for your next gig, recording session, or event.</p>
+            <hr class="my-4">
+            <p>Browse our inventory, check availability, and reserve equipment online.</p>
+            <a class="btn btn-primary btn-lg" href="{% url 'inventory:list' %}" role="button">View Equipment</a>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Quality Equipment</h5>
+                <p class="card-text">We offer a wide range of professional musical equipment.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Easy Rental</h5>
+                <p class="card-text">Simple online rental process with flexible pickup options.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Secure Payments</h5>
+                <p class="card-text">Multiple payment options for your convenience and security.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

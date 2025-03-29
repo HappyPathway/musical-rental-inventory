@@ -1,0 +1,455 @@
+{% extends "inventory/base_inventory.html" %}
+
+{% block inventory_title %}{{ title }}{% endblock %}
+
+{% block inventory_head %}
+<style>
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .camera-preview {
+        width: 100%;
+        height: 300px;
+        background-color: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    #camera-feed {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .camera-controls {
+        margin-top: 10px;
+        display: flex;
+        gap: 10px;
+    }
+    
+    .image-preview {
+        max-height: 150px;
+        margin-top: 10px;
+        border-radius: 4px;
+    }
+    
+    /* Mobile optimizations */
+    @media (max-width: 768px) {
+        .form-label {
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .mobile-input {
+            font-size: 16px !important; /* Prevents zoom on iOS */
+            height: auto;
+            padding: 10px;
+        }
+        
+        .btn-mobile {
+            padding: 12px;
+            font-size: 16px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block inventory_content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">{{ title }}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <!-- Left Column -->
+                        <div class="col-md-6">
+                            <h5 class="mb-3">Basic Information</h5>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.name.id_for_label }}" class="form-label">Name*</label>
+                                {{ form.name }}
+                                {% if form.name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.name.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.category.id_for_label }}" class="form-label">Category*</label>
+                                {{ form.category }}
+                                {% if form.category.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.category.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.brand.id_for_label }}" class="form-label">Brand*</label>
+                                {{ form.brand }}
+                                {% if form.brand.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.brand.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.model_number.id_for_label }}" class="form-label">Model Number</label>
+                                {{ form.model_number }}
+                                {% if form.model_number.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.model_number.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.serial_number.id_for_label }}" class="form-label">Serial Number</label>
+                                {{ form.serial_number }}
+                                {% if form.serial_number.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.serial_number.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.status.id_for_label }}" class="form-label">Status</label>
+                                {{ form.status }}
+                                {% if form.status.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.status.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                                {{ form.description }}
+                                {% if form.description.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.description.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Right Column -->
+                        <div class="col-md-6">
+                            <h5 class="mb-3">Pricing & Media</h5>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.rental_price_daily.id_for_label }}" class="form-label">Daily Rental Price*</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    {{ form.rental_price_daily }}
+                                </div>
+                                {% if form.rental_price_daily.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.rental_price_daily.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.rental_price_weekly.id_for_label }}" class="form-label">Weekly Rental Price</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    {{ form.rental_price_weekly }}
+                                </div>
+                                {% if form.rental_price_weekly.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.rental_price_weekly.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.rental_price_monthly.id_for_label }}" class="form-label">Monthly Rental Price</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    {{ form.rental_price_monthly }}
+                                </div>
+                                {% if form.rental_price_monthly.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.rental_price_monthly.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.deposit_amount.id_for_label }}" class="form-label">Security Deposit*</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    {{ form.deposit_amount }}
+                                </div>
+                                {% if form.deposit_amount.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.deposit_amount.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.condition.id_for_label }}" class="form-label">Condition</label>
+                                {{ form.condition }}
+                                {% if form.condition.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.condition.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Main Image Upload - with Camera support on mobile -->
+                            <div class="form-group">
+                                <label for="{{ form.main_image.id_for_label }}" class="form-label">Main Image</label>
+                                
+                                {% if is_mobile %}
+                                <div class="mb-2">
+                                    <button type="button" class="btn btn-outline-primary btn-mobile" id="toggle-camera">
+                                        <i class="fas fa-camera"></i> Use Camera
+                                    </button>
+                                </div>
+                                
+                                <div class="camera-preview d-none" id="camera-container">
+                                    <video id="camera-feed" autoplay playsinline></video>
+                                    <div class="camera-controls">
+                                        <button type="button" class="btn btn-primary btn-mobile" id="capture-photo">
+                                            <i class="fas fa-camera"></i> Capture
+                                        </button>
+                                        <button type="button" class="btn btn-secondary btn-mobile" id="close-camera">
+                                            <i class="fas fa-times"></i> Close
+                                        </button>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                {{ form.main_image }}
+                                
+                                {% if form.main_image.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.main_image.errors }}
+                                </div>
+                                {% endif %}
+                                
+                                <div id="image-preview-container" class="mt-2 {% if not equipment.main_image %}d-none{% endif %}">
+                                    <p>Current Image:</p>
+                                    <img id="image-preview" class="image-preview" 
+                                        src="{% if equipment.main_image %}{{ equipment.main_image.url }}{% endif %}" 
+                                        alt="Equipment Image">
+                                </div>
+                            </div>
+                            
+                            <!-- Additional Attachments -->
+                            <div class="form-group">
+                                <label for="{{ form.attachments.id_for_label }}" class="form-label">Additional Attachments</label>
+                                {{ form.attachments }}
+                                <small class="form-text text-muted">You can select multiple files.</small>
+                                {% if form.attachments.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.attachments.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Advanced Information Section (Collapsible) -->
+                    <div class="mt-4">
+                        <div class="card">
+                            <div class="card-header bg-light" id="advanced-info-header">
+                                <button class="btn btn-link text-decoration-none text-dark p-0" type="button" 
+                                        data-bs-toggle="collapse" data-bs-target="#advanced-info-content">
+                                    <h5 class="mb-0">Advanced Information <i class="fas fa-chevron-down ms-2"></i></h5>
+                                </button>
+                            </div>
+                            
+                            <div id="advanced-info-content" class="collapse">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="{{ form.purchase_date.id_for_label }}" class="form-label">Purchase Date</label>
+                                                {{ form.purchase_date }}
+                                                {% if form.purchase_date.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.purchase_date.errors }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="{{ form.purchase_price.id_for_label }}" class="form-label">Purchase Price</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">$</span>
+                                                    {{ form.purchase_price }}
+                                                </div>
+                                                {% if form.purchase_price.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.purchase_price.errors }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="{{ form.notes.id_for_label }}" class="form-label">Notes</label>
+                                        {{ form.notes }}
+                                        {% if form.notes.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.notes.errors }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Form Buttons -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a href="{% if equipment %}{% url 'inventory:detail' pk=equipment.id %}{% else %}{% url 'inventory:list' %}{% endif %}" class="btn btn-secondary me-md-2">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary {% if is_mobile %}btn-mobile{% endif %}">
+                            {% if equipment %}Update{% else %}Save{% endif %} Equipment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // File input preview
+        const imageInput = document.getElementById('{{ form.main_image.id_for_label }}');
+        const previewContainer = document.getElementById('image-preview-container');
+        const previewImage = document.getElementById('image-preview');
+        
+        if (imageInput) {
+            imageInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    var reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        previewImage.src = e.target.result;
+                        previewContainer.classList.remove('d-none');
+                    }
+                    
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+        }
+        
+        {% if is_mobile %}
+        // Mobile camera functionality
+        const toggleCameraButton = document.getElementById('toggle-camera');
+        const cameraContainer = document.getElementById('camera-container');
+        const cameraFeed = document.getElementById('camera-feed');
+        const captureButton = document.getElementById('capture-photo');
+        const closeCameraButton = document.getElementById('close-camera');
+        let stream = null;
+        
+        // Function to start the camera
+        function startCamera() {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 } 
+                    } 
+                })
+                .then(function(s) {
+                    stream = s;
+                    cameraFeed.srcObject = s;
+                    cameraContainer.classList.remove('d-none');
+                })
+                .catch(function(error) {
+                    console.error("Camera error:", error);
+                    alert("Could not access camera. Please check permissions.");
+                });
+            } else {
+                alert("Your browser does not support camera access");
+            }
+        }
+        
+        // Function to stop the camera
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => {
+                    track.stop();
+                });
+                cameraFeed.srcObject = null;
+                stream = null;
+                cameraContainer.classList.add('d-none');
+            }
+        }
+        
+        // Toggle camera on button click
+        if (toggleCameraButton) {
+            toggleCameraButton.addEventListener('click', function() {
+                startCamera();
+            });
+        }
+        
+        // Close camera
+        if (closeCameraButton) {
+            closeCameraButton.addEventListener('click', function() {
+                stopCamera();
+            });
+        }
+        
+        // Capture photo
+        if (captureButton) {
+            captureButton.addEventListener('click', function() {
+                if (stream) {
+                    // Create canvas and draw video frame
+                    const canvas = document.createElement('canvas');
+                    canvas.width = cameraFeed.videoWidth;
+                    canvas.height = cameraFeed.videoHeight;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(cameraFeed, 0, 0, canvas.width, canvas.height);
+                    
+                    // Convert to blob and create file object
+                    canvas.toBlob(function(blob) {
+                        const file = new File([blob], "camera-capture.jpg", { type: "image/jpeg" });
+                        
+                        // Create FileList object
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+                        
+                        // Set to file input
+                        imageInput.files = dataTransfer.files;
+                        
+                        // Show preview
+                        previewImage.src = URL.createObjectURL(blob);
+                        previewContainer.classList.remove('d-none');
+                        
+                        // Stop camera
+                        stopCamera();
+                    }, 'image/jpeg', 0.95);
+                }
+            });
+        }
+        {% endif %}
+    });
+</script>
+{% endblock %}

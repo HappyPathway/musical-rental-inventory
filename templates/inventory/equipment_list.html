@@ -1,0 +1,137 @@
+{% extends "inventory/base_inventory.html" %}
+
+{% block inventory_title %}Equipment Inventory{% endblock %}
+
+{% block inventory_content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <form action="{% url 'inventory:list' %}" method="get" class="d-flex flex-wrap gap-2">
+            <div class="input-group me-2 mb-2 mb-md-0" style="max-width: 250px;">
+                <input type="text" name="search" class="form-control" placeholder="Search..." value="{{ search_query }}">
+                <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></button>
+            </div>
+            
+            <select name="category" class="form-select me-2 mb-2 mb-md-0" style="max-width: 200px;">
+                <option value="">All Categories</option>
+                {% for category in categories %}
+                <option value="{{ category.id }}" {% if category.id|stringformat:"i" == category_id %}selected{% endif %}>
+                    {{ category.name }}
+                </option>
+                {% endfor %}
+            </select>
+            
+            <select name="status" class="form-select me-2 mb-2 mb-md-0" style="max-width: 200px;">
+                <option value="">All Status</option>
+                {% for status_value, status_label in status_choices %}
+                <option value="{{ status_value }}" {% if status_value == status %}selected{% endif %}>
+                    {{ status_label }}
+                </option>
+                {% endfor %}
+            </select>
+            
+            <button type="submit" class="btn btn-primary mb-2 mb-md-0">Filter</button>
+            <a href="{% url 'inventory:list' %}" class="btn btn-outline-secondary mb-2 mb-md-0">Clear</a>
+        </form>
+    </div>
+    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        {% if user.is_staff %}
+        <a href="{% url 'inventory:add' %}" class="btn btn-success">
+            <i class="fas fa-plus"></i> Add Equipment
+        </a>
+        <a href="{% url 'inventory:scan' %}" class="btn btn-info">
+            <i class="fas fa-qrcode"></i> Scan QR
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    {% if equipment %}
+        {% for item in equipment %}
+        <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
+            <div class="card h-100 equipment-card">
+                {% if item.status != 'available' %}
+                <div class="status-badge">
+                    <span class="badge rounded-pill 
+                        {% if item.status == 'rented' %}bg-danger{% elif item.status == 'maintenance' %}bg-warning{% else %}bg-secondary{% endif %}">
+                        {{ item.get_status_display }}
+                    </span>
+                </div>
+                {% endif %}
+                
+                {% if item.main_image %}
+                <img src="{{ item.main_image.url }}" class="card-img-top" alt="{{ item.name }}">
+                {% else %}
+                <div class="card-img-top bg-light d-flex justify-content-center align-items-center">
+                    <i class="fas fa-guitar fa-5x text-secondary"></i>
+                </div>
+                {% endif %}
+                
+                <div class="card-body">
+                    <h5 class="card-title">{{ item.name }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ item.brand }}</h6>
+                    <p class="card-text">
+                        <small>Category: {{ item.category.name }}</small><br>
+                        <strong>${{ item.rental_price_daily }}/day</strong>
+                    </p>
+                </div>
+                <div class="card-footer bg-white border-top-0">
+                    <a href="{% url 'inventory:detail' pk=item.id %}" class="btn btn-sm btn-primary w-100">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                No equipment found matching your criteria. <a href="{% url 'inventory:list' %}">Clear filters</a> to see all equipment.
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Pagination -->
+{% if equipment.has_other_pages %}
+<div class="row mt-4">
+    <div class="col-12">
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if equipment.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ equipment.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_id %}&category={{ category_id }}{% endif %}{% if status %}&status={{ status }}{% endif %}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link" aria-hidden="true">&laquo;</span>
+                </li>
+                {% endif %}
+                
+                {% for num in equipment.paginator.page_range %}
+                    {% if equipment.number == num %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_id %}&category={{ category_id }}{% endif %}{% if status %}&status={{ status }}{% endif %}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if equipment.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ equipment.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_id %}&category={{ category_id }}{% endif %}{% if status %}&status={{ status }}{% endif %}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link" aria-hidden="true">&raquo;</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
