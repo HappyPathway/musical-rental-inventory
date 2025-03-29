@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Change User Type - ROKNSOUND{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2>Change User Type</h2>
+            <p class="text-muted">Change the role and permissions for this user</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="my-0">User Details</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Warning:</strong> Changing a user's type affects their permissions and access to the system.
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="text-center mb-4">
+                                <div class="avatar-circle mb-3">
+                                    <span class="avatar-initials">{{ user_to_change.first_name.0|default:user_to_change.username.0|upper }}{{ user_to_change.last_name.0|upper }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <h5 class="border-bottom pb-2 mb-3">Current Information</h5>
+                            <div class="row mb-2">
+                                <div class="col-sm-4"><strong>Username:</strong></div>
+                                <div class="col-sm-8">{{ user_to_change.username }}</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-sm-4"><strong>Name:</strong></div>
+                                <div class="col-sm-8">{{ user_to_change.get_full_name|default:user_to_change.username }}</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-sm-4"><strong>Email:</strong></div>
+                                <div class="col-sm-8">{{ user_to_change.email }}</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-sm-4"><strong>Current Type:</strong></div>
+                                <div class="col-sm-8">
+                                    <span class="badge {% if user_to_change.profile.user_type == 'admin' %}bg-danger{% elif user_to_change.profile.user_type == 'employee' %}bg-info{% else %}bg-success{% endif %}">
+                                        {{ user_to_change.profile.get_user_type_display }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <div class="d-flex justify-content-center mt-4">
+                            <button type="submit" class="btn btn-primary">Change User Type</button>
+                            <a href="{% url 'users:user_list' %}" class="btn btn-outline-secondary ms-2">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-circle {
+    width: 100px;
+    height: 100px;
+    background-color: #007bff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+}
+.avatar-initials {
+    color: white;
+    font-size: 32px;
+    font-weight: bold;
+}
+</style>
+{% endblock %}

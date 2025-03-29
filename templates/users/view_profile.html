@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile - ROKNSOUND{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="my-0">My Profile</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center mb-4">
+                            <div class="avatar-circle mb-3">
+                                <span class="avatar-initials">{{ user.first_name.0|default:user.username.0|upper }}{{ user.last_name.0|upper }}</span>
+                            </div>
+                            <h5>{{ user.get_full_name|default:user.username }}</h5>
+                            <p class="text-muted">{{ user.profile.get_user_type_display }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <h5 class="border-bottom pb-2 mb-3">Account Information</h5>
+                        <div class="row mb-2">
+                            <div class="col-sm-4"><strong>Username:</strong></div>
+                            <div class="col-sm-8">{{ user.username }}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-4"><strong>Email:</strong></div>
+                            <div class="col-sm-8">{{ user.email }}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-4"><strong>Full Name:</strong></div>
+                            <div class="col-sm-8">{{ user.get_full_name|default:"Not provided" }}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-4"><strong>Phone:</strong></div>
+                            <div class="col-sm-8">{{ user.profile.phone_number|default:"Not provided" }}</div>
+                        </div>
+                        
+                        <h5 class="border-bottom pb-2 mb-3 mt-4">Address Information</h5>
+                        <div class="row mb-2">
+                            <div class="col-sm-4"><strong>Address:</strong></div>
+                            <div class="col-sm-8">{{ user.profile.address|default:"Not provided" }}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-4"><strong>City:</strong></div>
+                            <div class="col-sm-8">{{ user.profile.city|default:"Not provided" }}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-4"><strong>State:</strong></div>
+                            <div class="col-sm-8">{{ user.profile.state|default:"Not provided" }}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-4"><strong>ZIP Code:</strong></div>
+                            <div class="col-sm-8">{{ user.profile.zip_code|default:"Not provided" }}</div>
+                        </div>
+                        
+                        {% if user.profile.is_staff_member and user.profile.staff_info %}
+                        <h5 class="border-bottom pb-2 mb-3 mt-4">Staff Information</h5>
+                        <div class="row mb-2">
+                            <div class="col-sm-4"><strong>Employee ID:</strong></div>
+                            <div class="col-sm-8">{{ user.profile.staff_info.employee_id }}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-4"><strong>Position:</strong></div>
+                            <div class="col-sm-8">{{ user.profile.staff_info.position }}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-4"><strong>Department:</strong></div>
+                            <div class="col-sm-8">{{ user.profile.staff_info.department }}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-4"><strong>Hire Date:</strong></div>
+                            <div class="col-sm-8">{{ user.profile.staff_info.hire_date }}</div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if user.profile.is_customer and user.profile.customer_info %}
+                        <h5 class="border-bottom pb-2 mb-3 mt-4">Customer Information</h5>
+                        <div class="row mb-2">
+                            <div class="col-sm-4"><strong>Preferred Payment:</strong></div>
+                            <div class="col-sm-8">{{ user.profile.customer_info.preferred_payment_method|default:"Not specified" }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <a href="{% url 'users:update_profile' %}" class="btn btn-primary">Edit Profile</a>
+                    <a href="{% url 'users:dashboard' %}" class="btn btn-outline-secondary ms-2">Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-circle {
+    width: 100px;
+    height: 100px;
+    background-color: #007bff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+}
+.avatar-initials {
+    color: white;
+    font-size: 32px;
+    font-weight: bold;
+}
+</style>
+{% endblock %}

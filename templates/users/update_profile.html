@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Update Profile - ROKNSOUND{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="my-0">Update Profile</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Account Information</h5>
+                            {{ user_form|crispy }}
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Contact Information</h5>
+                            {{ profile_form|crispy }}
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <a href="{% url 'users:view_profile' %}" class="btn btn-outline-secondary ms-2">Cancel</a>
+                    </div>
+                </form>
+                
+                <div class="mt-4 pt-4 border-top">
+                    <h5>Account Security</h5>
+                    <p class="text-muted">To change your password, click the button below.</p>
+                    <a href="{% url 'users:password_reset' %}" class="btn btn-outline-secondary">Reset Password</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

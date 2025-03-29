@@ -28,6 +28,7 @@ urlpatterns = [
     path("rentals/", include("rentals.urls")),
     path("payments/", include("payments.urls")),
     path("accounts/", include("allauth.urls")),
+    path("users/", include("users.urls")),
 ]
 
 # Serve media and static files in development

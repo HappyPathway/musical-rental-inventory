@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "inventory.apps.InventoryConfig",
     "rentals.apps.RentalsConfig",
     "payments.apps.PaymentsConfig",
+    "users.apps.UsersConfig",
 ]
 
 MIDDLEWARE = [
@@ -163,3 +164,15 @@ STRIPE_PUBLIC_KEY = ""
 STRIPE_SECRET_KEY = ""
 PAYPAL_CLIENT_ID = ""
 PAYPAL_SECRET_KEY = ""
+
+# Django AllAuth Settings
+LOGIN_REDIRECT_URL = 'users:dashboard'
+ACCOUNT_LOGOUT_REDIRECT_URL = 'home'
+ACCOUNT_SIGNUP_REDIRECT_URL = 'users:dashboard'
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'optional'  # Set to 'mandatory' in production
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_SESSION_REMEMBER = True
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_SIGNUP_FORM_CLASS = 'users.forms.CustomerRegistrationForm'

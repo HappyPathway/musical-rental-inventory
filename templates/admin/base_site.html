@@ -1,0 +1,90 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'css/admin_custom.css' %}">
+  <style>
+    :root {
+      --primary: #007bff;
+      --secondary: #6c757d;
+      --link-fg: #007bff;
+      --link-hover-color: #0056b3;
+      --header-bg: #007bff;
+      --header-color: white;
+    }
+    
+    #header {
+      background: var(--header-bg);
+      color: var(--header-color);
+    }
+    
+    #branding h1 {
+      color: var(--header-color);
+    }
+    
+    a:link, a:visited {
+      color: var(--link-fg);
+    }
+    
+    a:hover {
+      color: var(--link-hover-color);
+    }
+    
+    .module h2, .module caption, .inline-group h2 {
+      background: var(--primary);
+      color: var(--header-color);
+    }
+    
+    .button, input[type=submit], input[type=button], .submit-row input, a.button {
+      background: var(--primary);
+      color: var(--header-color);
+    }
+    
+    .button:hover, input[type=submit]:hover, input[type=button]:hover {
+      background: var(--link-hover-color);
+    }
+    
+    .button.default, input[type=submit].default, .submit-row input.default {
+      background: var(--primary);
+    }
+    
+    .button.default:hover, input[type=submit].default:hover {
+      background: var(--link-hover-color);
+    }
+    
+    .object-tools a:link, .object-tools a:visited {
+      background: var(--primary);
+    }
+    
+    .object-tools a:hover {
+      background: var(--link-hover-color);
+    }
+  </style>
+{% endblock %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('ROKNSOUND Admin') }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">
+        <img src="{% static 'images/roknsound-logo.png' %}" alt="ROKNSOUND Logo" height="30" class="me-2">
+        ROKNSOUND Administration
+    </a>
+</h1>
+{% endblock %}
+
+{% block usertools %}
+<div id="user-tools">
+    {% if user.is_authenticated %}
+    <strong>{% firstof user.get_short_name user.get_username %}</strong> |
+    {% if user.has_usable_password %}
+    <a href="{% url 'admin:password_change' %}">Change password</a> /
+    {% endif %}
+    <a href="{% url 'admin:logout' %}">Log out</a> /
+    <a href="{% url 'users:dashboard' %}">Return to Site</a>
+    {% endif %}
+</div>
+{% endblock %}

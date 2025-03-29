@@ -46,7 +46,7 @@
                     </ul>
                     <ul class="navbar-nav">
                         {% if user.is_authenticated %}
-                            {% if user.is_staff %}
+                            {% if user.profile.is_staff_member %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
                             </li>
@@ -56,15 +56,18 @@
                                     {{ user.username }}
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{% url 'account_logout' %}">Logout</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'users:dashboard' %}">Dashboard</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'users:view_profile' %}">My Profile</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{% url 'users:logout' %}">Logout</a></li>
                                 </ul>
                             </li>
                         {% else %}
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'account_login' %}">Login</a>
+                                <a class="nav-link" href="{% url 'users:login' %}">Login</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'account_signup' %}">Register</a>
+                                <a class="nav-link" href="{% url 'users:register' %}">Register</a>
                             </li>
                         {% endif %}
                     </ul>
@@ -108,9 +111,11 @@
                         <li><a href="{% url 'inventory:list' %}">Equipment</a></li>
                         <li><a href="{% url 'rentals:list' %}">Rentals</a></li>
                         {% if user.is_authenticated %}
-                        <li><a href="{% url 'account_logout' %}">Logout</a></li>
+                        <li><a href="{% url 'users:dashboard' %}">Dashboard</a></li>
+                        <li><a href="{% url 'users:logout' %}">Logout</a></li>
                         {% else %}
-                        <li><a href="{% url 'account_login' %}">Login</a></li>
+                        <li><a href="{% url 'users:login' %}">Login</a></li>
+                        <li><a href="{% url 'users:register' %}">Register</a></li>
                         {% endif %}
                     </ul>
                 </div>

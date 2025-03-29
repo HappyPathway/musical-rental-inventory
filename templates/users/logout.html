@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Logged Out - ROKNSOUND{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="my-0">Logged Out</h4>
+            </div>
+            <div class="card-body text-center">
+                <p class="lead mb-4">You have been successfully logged out.</p>
+                <p>Thank you for using ROKNSOUND!</p>
+                <a href="{% url 'users:login' %}" class="btn btn-primary mt-3">Log In Again</a>
+                <a href="{% url 'home' %}" class="btn btn-outline-secondary mt-3 ms-2">Return to Home</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
