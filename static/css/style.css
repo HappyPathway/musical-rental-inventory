@@ -27,7 +27,7 @@ html {
 body {
     font-family: 'Open Sans', sans-serif;
     background-color: #121212;
-    color: #F0E6D2;
+    color: #ffffff; /* Changed from #F0E6D2 to white for better contrast */
     line-height: 1.6;
     position: relative;
     min-height: 100vh;
@@ -41,7 +41,7 @@ h1, h2, h3, h4, h5, h6 {
     font-family: 'Oswald', sans-serif;
     font-weight: 700;
     margin-bottom: 1rem;
-    color: #F0E6D2;
+    color: #ffffff; /* Changed from #F0E6D2 to white for better contrast */
     text-transform: uppercase;
     letter-spacing: 1px;
 }
@@ -77,18 +77,19 @@ h3 {
 p {
     margin-bottom: 1rem;
     font-size: 1rem;
+    color: #ffffff; /* Explicitly setting paragraph color to white */
 }
 
 /* Links */
 a {
-    color: #F0E6D2;
-    text-decoration: none;
+    color: #FFCE54; /* Changed from #F0E6D2 to #FFCE54 for better contrast */
+    text-decoration: underline; /* Added underline for better accessibility */
     transition: color 0.3s ease;
 }
 
 a:hover {
-    color: #C23B23;
-    text-decoration: none;
+    color: #ffffff; /* Brighter on hover */
+    text-decoration: underline;
 }
 
 /* Main Container */
@@ -101,14 +102,14 @@ a:hover {
 
 /* Adding darker background for main content area */
 main.container, body main.container.py-4 {
-    background-color: #222222 !important;
+    background-color: #1a1a1a !important; /* Slightly lighter than #121212 */
     border-radius: 8px !important;
     padding: 25px !important;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
     border: 1px solid #3A3A3A !important;
     margin-top: 20px !important;
     margin-bottom: 20px !important;
-    color: #ffffff !important; /* Brighter text color for better contrast */
+    color: #ffffff !important; /* Pure white for maximum contrast */
 }
 
 /* Ensure all text elements within main content have good contrast */
@@ -117,34 +118,33 @@ main.container li,
 main.container label,
 main.container span,
 main.container div {
-    color: #ffffff !important; /* Brighter white for better contrast */
+    color: #ffffff !important; /* Pure white for maximum contrast */
 }
 
-/* Ensure links within main content area have good contrast */
-main.container a {
-    color: #FFCE54 !important; /* Using VU Yellow for links for better visibility */
-    text-decoration: underline;
+/* Ensure table text has good contrast */
+.table {
+    width: 100%;
+    margin-bottom: 1rem;
+    color: #ffffff; /* Changed from #F0E6D2 to white */
+    border-collapse: collapse;
 }
 
-main.container a:hover {
-    color: #ffffff !important;
-    text-decoration: underline;
+.table th, 
+.table td {
+    padding: 0.75rem;
+    vertical-align: middle;
+    border-top: 1px solid #3A3A3A;
+    color: #ffffff; /* Explicitly white */
 }
 
-/* Ensure form inputs have good contrast */
-main.container .form-control {
-    color: #ffffff;
-    background-color: #2c2c2c;
-    border: 1px solid #3A3A3A;
-}
-
-/* Ensure table text within main content has good contrast */
-main.container .table {
-    color: #ffffff;
-}
-
-main.container .table tbody tr:hover {
-    background-color: #3A3A3A;
+.table thead th {
+    background-color: #121212;
+    border-bottom: 2px solid #C23B23;
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    color: #FFCE54; /* Keep yellow for headers */
 }
 
 /* Navbar */
@@ -160,13 +160,13 @@ main.container .table tbody tr:hover {
 .navbar-brand {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 2rem;
-    color: #F0E6D2;
+    color: #ffffff; /* Changed to pure white */
     letter-spacing: 2px;
 }
 
 .navbar-nav .nav-link {
     font-family: 'Oswald', sans-serif;
-    color: #F0E6D2;
+    color: #ffffff; /* Changed to pure white */
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -198,34 +198,34 @@ main.container .table tbody tr:hover {
 }
 
 .btn-primary {
-    background-color: #C23B23;
-    color: #F0E6D2;
+    background-color: #C23B23; /* Muted Gray */
+    color: #121212; /* Charcoal Black for darker text */
 }
 
 .btn-primary:hover {
-    background-color: #F0E6D2;
-    color: #C23B23;
+    background-color: #4A4A4A; /* Slightly lighter gray on hover */
+    color: #F0E6D2; /* Off-white for better contrast on hover */
 }
 
 .btn-secondary {
-    background-color: #3A3A3A;
-    color: #F0E6D2;
+    background-color: #3A3A3A; /* Muted Gray */
+    color: #121212; /* Charcoal Black for darker text */
 }
 
 .btn-secondary:hover {
-    background-color: #F0E6D2;
-    color: #3A3A3A;
+    background-color: #4A4A4A; /* Slightly lighter gray on hover */
+    color: #F0E6D2; /* Off-white for better contrast on hover */
 }
 
 .btn-accent {
-    background-color: #FFCE54;
-    color: #121212;
+    background-color: #3A3A3A; /* Muted Gray instead of yellow */
+    color: #121212; /* Charcoal Black for darker text */
 }
 
 .btn-accent:hover {
-    background-color: #121212;
-    color: #FFCE54;
-    outline: 2px solid #FFCE54;
+    background-color: #4A4A4A; /* Slightly lighter gray on hover */
+    color: #F0E6D2; /* Off-white for better contrast on hover */
+    outline: 1px solid #FFCE54; /* Keep the yellow accent in the outline */
 }
 
 /* Cards */
@@ -322,7 +322,7 @@ main.container .table tbody tr:hover {
 .table {
     width: 100%;
     margin-bottom: 1rem;
-    color: #F0E6D2;
+    color: #ffffff; /* Changed from #F0E6D2 to white */
     border-collapse: collapse;
 }
 
@@ -331,6 +331,7 @@ main.container .table tbody tr:hover {
     padding: 0.75rem;
     vertical-align: middle;
     border-top: 1px solid #3A3A3A;
+    color: #ffffff; /* Explicitly white */
 }
 
 .table thead th {
@@ -340,7 +341,7 @@ main.container .table tbody tr:hover {
     text-transform: uppercase;
     letter-spacing: 1px;
     font-weight: 600;
-    color: #FFCE54;
+    color: #FFCE54; /* Keep yellow for headers */
 }
 
 .table tbody tr {
@@ -608,4 +609,12 @@ footer {
     .card-img-top {
         height: 150px;
     }
+}
+
+/* Setting jumbotron background color */
+.jumbotron, .bg-light.p-5.rounded {
+    background-color: #3A3A3A !important;
+    color: #ffffff !important;
+    border: 1px solid #4a4a4a;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
