@@ -152,21 +152,11 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # Authentication settings
-AUTHENTICATION_BACKENDS = [
-    # Needed to login by username in Django admin
-    'django.contrib.auth.backends.ModelBackend',
-    # `allauth` specific authentication methods
-    'allauth.account.auth_backends.AuthenticationBackend',
-]
-
-# Payment settings 
-STRIPE_PUBLIC_KEY = ""
-STRIPE_SECRET_KEY = ""
-PAYPAL_CLIENT_ID = ""
-PAYPAL_SECRET_KEY = ""
+LOGIN_URL = 'users:login'
+LOGIN_REDIRECT_URL = 'users:dashboard'
+LOGOUT_REDIRECT_URL = 'home'
 
 # Django AllAuth Settings
-LOGIN_REDIRECT_URL = 'users:dashboard'
 ACCOUNT_LOGOUT_REDIRECT_URL = 'home'
 ACCOUNT_SIGNUP_REDIRECT_URL = 'users:dashboard'
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'

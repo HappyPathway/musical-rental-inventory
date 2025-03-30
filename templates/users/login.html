@@ -4,21 +4,26 @@
 {% block title %}Log In - ROKNSOUND{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
+<div class="row justify-content-center mt-5">
     <div class="col-md-6">
         <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <h4 class="my-0">Log In</h4>
+            <div class="card-header">
+                <h4 class="my-0 text-white">Log In to ROKNSOUND</h4>
             </div>
             <div class="card-body">
                 <form method="post">
                     {% csrf_token %}
+                    {% if next %}
+                    <input type="hidden" name="next" value="{{ next }}">
+                    {% endif %}
                     {{ form|crispy }}
-                    <button type="submit" class="btn btn-primary w-100 mt-3">Log In</button>
+                    <button type="submit" class="btn btn-accent w-100 mt-4">
+                        <i class="fas fa-sign-in-alt me-2"></i>Log In
+                    </button>
                 </form>
-                <div class="mt-3 text-center">
-                    <p>Don't have an account? <a href="{% url 'users:register' %}">Register</a></p>
-                    <p><a href="{% url 'users:password_reset' %}">Forgot your password?</a></p>
+                <div class="mt-4 text-center">
+                    <p class="mb-2">Don't have an account? <a href="{% url 'users:register' %}" class="text-accent">Register</a></p>
+                    <p><a href="{% url 'users:password_reset' %}" class="text-muted">Forgot your password?</a></p>
                 </div>
             </div>
         </div>

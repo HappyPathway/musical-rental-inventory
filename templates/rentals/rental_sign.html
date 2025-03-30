@@ -1,0 +1,159 @@
+{% extends "rentals/base_rentals.html" %}
+{% load static %}
+
+{% block rentals_title %}Sign Rental Contract #{{ rental.id }}{% endblock %}
+
+{% block rentals_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.css">
+<style>
+    .contract-content {
+        background-color: #ffffff;
+        color: #121212;
+        padding: 2rem;
+        border-radius: 8px;
+        white-space: pre-wrap;
+        font-family: 'Courier New', monospace;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border: 1px solid #3A3A3A;
+        border-top: 2px solid transparent;
+        border-bottom: 2px solid transparent;
+        border-image: linear-gradient(to right, #C23B23, #FFCE54) 1;
+    }
+    
+    #signature-pad {
+        border: 2px solid #3A3A3A;
+        border-radius: 8px;
+        background-color: #ffffff;
+        width: 100%;
+        height: 200px;
+        margin-bottom: 1rem;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .signature-container {
+        background-color: #1a1a1a;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        border: 1px solid #3A3A3A;
+    }
+    
+    .signature-buttons {
+        margin-bottom: 1rem;
+    }
+    
+    .terms-agree {
+        margin-bottom: 2rem;
+        padding: 1rem;
+        border: 1px solid #3A3A3A;
+        border-radius: 8px;
+        background-color: #1a1a1a;
+    }
+    
+    .sign-instructions {
+        color: #FFCE54;
+        font-family: 'Oswald', sans-serif;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block rentals_content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0 text-white">Sign Rental Contract</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    Please review the contract carefully before signing. Your signature indicates acceptance of all terms and conditions.
+                </div>
+
+                <div class="contract-content">
+                    {{ contract.content }}
+                </div>
+
+                <form method="post" id="contract-form">
+                    {% csrf_token %}
+                    {{ form.non_field_errors }}
+                    
+                    <div class="signature-container">
+                        <h6 class="sign-instructions">Digital Signature</h6>
+                        <p class="text-muted mb-3">Please sign below using your mouse or touch screen.</p>
+                        <canvas id="signature-pad"></canvas>
+                        {{ form.signature }}
+                        
+                        <div class="signature-buttons">
+                            <button type="button" class="btn btn-secondary btn-sm" id="clear-signature">
+                                <i class="fas fa-eraser"></i> Clear Signature
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="terms-agree">
+                        <div class="form-check">
+                            {{ form.agree_to_terms }}
+                            <label class="form-check-label" for="{{ form.agree_to_terms.id_for_label }}">
+                                {{ form.agree_to_terms.label }}
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'rentals:rental_detail' rental.id %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-signature"></i> Complete Signing
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block rentals_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const canvas = document.getElementById('signature-pad');
+    const signaturePad = new SignaturePad(canvas, {
+        backgroundColor: 'rgb(255, 255, 255)'
+    });
+    
+    // Handle window resize
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    
+    function resizeCanvas() {
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        canvas.width = canvas.offsetWidth * ratio;
+        canvas.height = canvas.offsetHeight * ratio;
+        canvas.getContext("2d").scale(ratio, ratio);
+        signaturePad.clear();
+    }
+    
+    // Clear signature button
+    document.getElementById('clear-signature').addEventListener('click', function() {
+        signaturePad.clear();
+    });
+    
+    // Form submission
+    document.getElementById('contract-form').addEventListener('submit', function(e) {
+        if (signaturePad.isEmpty()) {
+            e.preventDefault();
+            alert('Please provide your signature before submitting.');
+            return false;
+        }
+        
+        // Set the signature data in the hidden input
+        document.querySelector('.signature-data').value = signaturePad.toDataURL();
+    });
+});
+</script>
+{% endblock %}
