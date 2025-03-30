@@ -79,28 +79,52 @@ Track equipment maintenance:
    - Verify availability status
    - Specify rental period (daily, weekly, monthly)
 4. Review rental details and total costs
-5. Collect security deposit
-6. Finalize the rental by clicking "Create Rental"
+5. Generate and sign rental contract
+6. Collect security deposit
+7. Finalize the rental
+
+#### Contract Management
+
+1. **Contract Generation**
+   - Automatically generated when creating a rental
+   - Contains equipment details, pricing, and rental terms
+   - Lists all equipment with serial numbers
+   - Shows deposit amounts and fees
+
+2. **Digital Signing Process**
+   - Review contract terms
+   - Use digital signature pad (mouse or touch input)
+   - Check agreement checkbox
+   - Contract is timestamped upon signing
+
+3. **Post-Signing Actions**
+   - Rental status changes to 'active'
+   - Equipment status updates to 'rented'
+   - Contract becomes part of rental record
+   - Digital signature stored securely
 
 #### Processing Returns
 
 1. From "View Rentals", find the active rental
 2. Click on the rental ID to view details
 3. Click "Process Return"
-4. Inspect returned equipment and note any damage
-5. Calculate any additional fees if applicable:
-   - Late return charges
-   - Damage fees
-   - Missing accessories
-6. Process payment or refund deposit
-7. Click "Complete Return" to finalize
+4. For each equipment item:
+   - Assess condition and note any damage
+   - Calculate applicable fees:
+     - Late return charges ($10/day)
+     - Damage fees if applicable
+     - Missing accessories charges
+5. Process payment or refund deposit
+6. Complete return to update inventory
 
 #### Managing Rental Extensions
 
 1. From the rental detail page, click "Extend Rental"
 2. Select new return date
-3. Calculate additional charges
-4. Process payment for extension
+3. Calculate additional charges:
+   - Extension fees ($10/day)
+   - Any overdue fees if applicable
+4. Process additional payment
 5. Update rental record
 
 ### 4. User Management

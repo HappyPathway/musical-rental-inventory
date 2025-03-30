@@ -17,18 +17,21 @@ This document tracks the implementation status of features described in the READ
 - ✅ QR code generation for equipment items
 - ✅ Maintenance record tracking
 
-### 🟨 Rental System
+### ✅ Rental System
 - ✅ Basic rental models and views
 - ✅ Rental listing page with search and filtering
-- 🟨 Rental creation workflow needs completion
-- ❌ Return processing workflow not implemented
-- ❌ Rental extension workflow not implemented
+- ✅ Rental creation workflow
+- ✅ Digital contract generation and signing
+- ✅ Return processing workflow
+- ✅ Rental extension workflow
+- ✅ Equipment status tracking
 
 ### 🟨 Payment Processing
 - ✅ Payment models defined
 - ✅ Payment views secured with authentication
 - ❌ Integration with payment providers (PayPal, Stripe, etc.)
 - ❌ Security deposit handling
+- ❌ Automated late fees processing
 
 ### 🟨 User Management
 - ✅ User authentication and roles (customer, employee, admin)
@@ -43,31 +46,25 @@ This document tracks the implementation status of features described in the READ
 
 ## Implementation Priorities (Q2 2025)
 
-1. **Complete Rental Workflow** (High Priority)
-   - Finish rental creation process with equipment selection
-   - Implement return processing with condition assessment
-   - Add rental extension functionality
-   - Estimated completion: April 2025
-
-2. **Payment Integration** (High Priority)
+1. **Payment Integration** (High Priority)
    - Integrate Stripe payment processing
    - Implement security deposit handling
    - Set up automated billing for late returns
-   - Estimated completion: May 2025
+   - Estimated completion: April 2025
 
-3. **Analytics & Reporting** (Medium Priority)
+2. **Analytics & Reporting** (High Priority)
    - Create dashboard widgets for key metrics
    - Implement rental history reports
    - Build inventory utilization analytics
-   - Estimated completion: June 2025
+   - Estimated completion: May 2025
 
-4. **Enhanced User Features** (Medium Priority)
+3. **Enhanced User Features** (Medium Priority)
    - Staff activity tracking
    - Customer rental history views
    - Equipment availability calendar
    - Estimated completion: June 2025
 
-5. **Mobile Optimizations** (Low Priority)
+4. **Mobile Optimizations** (Medium Priority)
    - Enhance QR code scanning on mobile
    - Improve responsive design for field use
    - Add offline capabilities for inventory checks
