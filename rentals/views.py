@@ -7,6 +7,7 @@ from django.core.paginator import Paginator
 from .models import Rental, RentalItem
 from inventory.models import Equipment
 from inventory.utils import log_search_query
+from .forms import RentalForm, RentalItemForm
 
 # Placeholder views for the rental app
 # These will be implemented more fully later
@@ -66,8 +67,38 @@ def rental_detail(request, pk):
 @login_required
 def rental_create(request):
     """View to create a new rental."""
-    # Placeholder implementation
-    return render(request, 'rentals/rental_form.html')
+    if request.method == 'POST':
+        rental_form = RentalForm(request.POST)
+        rental_item_form = RentalItemForm(request.POST)
+
+        if rental_form.is_valid() and rental_item_form.is_valid():
+            # Save the rental
+            rental = rental_form.save(commit=False)
+            rental.total_price = 0  # Initialize total price
+            rental.deposit_total = 0  # Initialize deposit total
+            rental.save()
+
+            # Save the rental item
+            equipment = rental_item_form.cleaned_data['equipment']
+            price = rental_item_form.cleaned_data['price']
+            RentalItem.objects.create(rental=rental, equipment=equipment, price=price)
+
+            # Update rental totals
+            rental.total_price = rental.calculate_total_price()
+            rental.deposit_total = rental.calculate_deposit_total()
+            rental.save()
+
+            messages.success(request, f'Rental #{rental.id} created successfully!')
+            return redirect('rentals:rental_list')
+    else:
+        rental_form = RentalForm()
+        rental_item_form = RentalItemForm()
+
+    context = {
+        'rental_form': rental_form,
+        'rental_item_form': rental_item_form,
+    }
+    return render(request, 'rentals/rental_form.html', context)
 
 @login_required
 def rental_edit(request, pk):
