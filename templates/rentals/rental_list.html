@@ -19,7 +19,7 @@
 {% block rentals_content %}
 <div class="row mb-4">
     <div class="col">
-        <a href="{% url 'rental_create' %}" class="btn btn-primary">
+        <a href="{% url 'rentals:rental_create' %}" class="btn btn-primary">
             <i class="fas fa-plus"></i> New Rental
         </a>
     </div>
@@ -42,7 +42,7 @@
             <a href="?status=overdue" class="btn btn-sm {% if request.GET.status == 'overdue' %}btn-primary{% else %}btn-secondary{% endif %}">Overdue</a>
             <a href="?status=completed" class="btn btn-sm {% if request.GET.status == 'completed' %}btn-primary{% else %}btn-secondary{% endif %}">Completed</a>
             <a href="?status=cancelled" class="btn btn-sm {% if request.GET.status == 'cancelled' %}btn-primary{% else %}btn-secondary{% endif %}">Cancelled</a>
-            <a href="{% url 'rental_list' %}" class="btn btn-sm {% if not request.GET.status %}btn-primary{% else %}btn-secondary{% endif %}">All</a>
+            <a href="{% url 'rentals:rental_list' %}" class="btn btn-sm {% if not request.GET.status %}btn-primary{% else %}btn-secondary{% endif %}">All</a>
         </div>
     </div>
     <div class="card-body p-0">
@@ -63,7 +63,7 @@
                 <tbody>
                     {% for rental in rentals %}
                     <tr>
-                        <td><a href="{% url 'rental_detail' rental.id %}">{{ rental.id }}</a></td>
+                        <td><a href="{% url 'rentals:rental_detail' rental.id %}">{{ rental.id }}</a></td>
                         <td>{{ rental.customer.name }}</td>
                         <td>{{ rental.start_date|date:"M d, Y" }}</td>
                         <td>{{ rental.end_date|date:"M d, Y" }}</td>
@@ -74,20 +74,20 @@
                         </td>
                         <td>${{ rental.total_price|floatformat:2 }}</td>
                         <td class="rental-actions">
-                            <a href="{% url 'rental_detail' rental.id %}" title="View Details">
+                            <a href="{% url 'rentals:rental_detail' rental.id %}" title="View Details">
                                 <i class="fas fa-eye"></i>
                             </a>
-                            <a href="{% url 'rental_update' rental.id %}" title="Edit">
+                            <a href="{% url 'rentals:rental_update' rental.id %}" title="Edit">
                                 <i class="fas fa-edit"></i>
                             </a>
                             {% if rental.status == 'pending' %}
-                            <a href="{% url 'rental_cancel' rental.id %}" title="Cancel" class="text-danger" 
+                            <a href="{% url 'rentals:rental_cancel' rental.id %}" title="Cancel" class="text-danger" 
                                onclick="return confirm('Are you sure you want to cancel this rental?');">
                                 <i class="fas fa-times-circle"></i>
                             </a>
                             {% endif %}
                             {% if rental.status == 'active' %}
-                            <a href="{% url 'rental_return' rental.id %}" title="Mark as Returned" class="text-success">
+                            <a href="{% url 'rentals:rental_return' rental.id %}" title="Mark as Returned" class="text-success">
                                 <i class="fas fa-check-circle"></i>
                             </a>
                             {% endif %}
@@ -102,9 +102,9 @@
             <p>No rentals found.</p>
             {% if request.GET.q or request.GET.status %}
             <p>Try clearing your search filters.</p>
-            <a href="{% url 'rental_list' %}" class="btn btn-secondary">Clear Filters</a>
+            <a href="{% url 'rentals:rental_list' %}" class="btn btn-secondary">Clear Filters</a>
             {% else %}
-            <a href="{% url 'rental_create' %}" class="btn btn-primary">Create Your First Rental</a>
+            <a href="{% url 'rentals:rental_create' %}" class="btn btn-primary">Create Your First Rental</a>
             {% endif %}
         </div>
         {% endif %}

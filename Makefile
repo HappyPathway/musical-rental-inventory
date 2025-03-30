@@ -1,4 +1,4 @@
-.PHONY: venv install migrate run shell test clean superuser static collectstatic lint help kill
+.PHONY: venv install migrate run shell test clean superuser static collectstatic lint help kill reset
 
 PYTHON = python3
 PIP = pip3
@@ -93,3 +93,6 @@ static:
 
 lint:
 	$(VENV_BIN)/flake8
+
+reset: kill static run
+	@echo "Reset complete: server restarted with updated static files."

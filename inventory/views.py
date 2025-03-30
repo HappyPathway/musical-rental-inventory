@@ -6,6 +6,7 @@ from django.urls import reverse
 from django.core.paginator import Paginator
 from .models import Equipment, Category, EquipmentAttachment, MaintenanceRecord
 from .forms import EquipmentForm, AttachmentForm, MaintenanceRecordForm
+from .utils import log_search_query
 import qrcode
 from io import BytesIO
 import base64
@@ -36,6 +37,14 @@ def equipment_list(request):
             brand__icontains=search_query
         ) | equipment_list.filter(
             serial_number__icontains=search_query
+        )
+        
+        # Log the search query
+        log_search_query(
+            request=request, 
+            query=search_query, 
+            app='inventory', 
+            results_count=equipment_list.count()
         )
     
     # Pagination

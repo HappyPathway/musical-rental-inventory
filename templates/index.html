@@ -10,48 +10,35 @@
             <p class="lead">Rent high-quality musical equipment for your next gig, recording session, or event.</p>
             <hr class="my-4">
             <p>Browse our inventory, check availability, and reserve equipment online.</p>
-            <a class="btn btn-primary btn-lg" href="{% url 'inventory:list' %}" role="button">View Equipment</a>
+            <a class="btn btn-primary btn-lg" href="{% url 'inventory:equipment_list' %}" role="button">View Equipment</a>
         </div>
     </div>
 </div>
 
 <div class="row mt-4">
     <div class="col-md-4">
-        <div class="card mb-4 h-100 shadow-sm">
+        <a href="{% url 'inventory:equipment_list' %}" class="card mb-4 h-100 shadow-sm text-decoration-none">
             <div class="card-body d-flex flex-column">
                 <h5 class="card-title">Quality Equipment</h5>
                 <p class="card-text">We offer a wide range of professional musical equipment for all your needs.</p>
-                <div class="mt-auto pt-3">
-                    <a href="{% url 'inventory:list' %}" class="btn btn-outline-primary">Browse Equipment</a>
-                </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-4">
-        <div class="card mb-4 h-100 shadow-sm">
+        <a href="{% url 'rentals:rental_list' %}" class="card mb-4 h-100 shadow-sm text-decoration-none">
             <div class="card-body d-flex flex-column">
                 <h5 class="card-title">Easy Rental</h5>
                 <p class="card-text">Simple online rental process with flexible pickup options and scheduling.</p>
-                <div class="mt-auto pt-3">
-                    <a href="{% url 'rentals:list' %}" class="btn btn-outline-primary">View Rentals</a>
-                </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-4">
-        <div class="card mb-4 h-100 shadow-sm">
+        <a href="{% if user.is_authenticated %}{% url 'users:dashboard' %}{% else %}{% url 'users:login' %}{% endif %}" class="card mb-4 h-100 shadow-sm text-decoration-none">
             <div class="card-body d-flex flex-column">
                 <h5 class="card-title">Your Account</h5>
                 <p class="card-text">Manage your rentals, payments, and personal information in one place.</p>
-                <div class="mt-auto pt-3">
-                    {% if user.is_authenticated %}
-                        <a href="{% url 'users:dashboard' %}" class="btn btn-outline-primary">My Dashboard</a>
-                    {% else %}
-                        <a href="{% url 'users:login' %}" class="btn btn-outline-primary">Login / Register</a>
-                    {% endif %}
-                </div>
             </div>
-        </div>
+        </a>
     </div>
 </div>
 

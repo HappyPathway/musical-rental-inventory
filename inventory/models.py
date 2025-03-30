@@ -1,5 +1,7 @@
 from django.db import models
+from django.contrib.auth.models import User
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.text import slugify
 from simple_history.models import HistoricalRecords
 import uuid
@@ -110,3 +112,26 @@ class MaintenanceRecord(models.Model):
     
     def __str__(self):
         return f"Maintenance for {self.equipment.name} on {self.date}"
+
+class SearchLog(models.Model):
+    """Model to track search queries made by users."""
+    query = models.CharField(max_length=255)
+    user = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='search_logs'
+    )
+    app = models.CharField(max_length=50, help_text="The app where the search was performed")
+    created_at = models.DateTimeField(default=timezone.now)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    results_count = models.IntegerField(default=0)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Search Log'
+        verbose_name_plural = 'Search Logs'
+    
+    def __str__(self):
+        return f"{self.query} ({self.created_at.strftime('%Y-%m-%d %H:%M')})"

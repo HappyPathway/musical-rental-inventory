@@ -1,6 +1,6 @@
 from django.contrib import admin
+from .models import Category, Equipment, MaintenanceRecord, EquipmentAttachment, SearchLog
 from simple_history.admin import SimpleHistoryAdmin
-from .models import Category, Equipment, EquipmentAttachment, MaintenanceRecord
 
 class EquipmentAttachmentInline(admin.TabularInline):
     model = EquipmentAttachment
@@ -52,3 +52,15 @@ class MaintenanceRecordAdmin(admin.ModelAdmin):
     list_display = ('equipment', 'date', 'description', 'cost', 'performed_by')
     list_filter = ('date', 'equipment')
     search_fields = ('description', 'performed_by', 'equipment__name')
+
+@admin.register(SearchLog)
+class SearchLogAdmin(admin.ModelAdmin):
+    list_display = ('query', 'app', 'user', 'created_at', 'results_count', 'ip_address')
+    list_filter = ('app', 'created_at')
+    search_fields = ('query', 'user__username', 'ip_address')
+    readonly_fields = ('query', 'user', 'app', 'created_at', 'ip_address', 'results_count')
+    date_hierarchy = 'created_at'
+    
+    def has_add_permission(self, request):
+        # Disable manual creation of search logs
+        return False

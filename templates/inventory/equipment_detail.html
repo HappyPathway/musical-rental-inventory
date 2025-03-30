@@ -24,7 +24,7 @@
                     </span>
                     
                     {% if equipment.qr_code %}
-                    <a href="{% url 'inventory:qr' pk=equipment.id %}" class="btn btn-sm btn-info">
+                    <a href="{% url 'inventory:equipment_qr' pk=equipment.id %}" class="btn btn-sm btn-info">
                         <i class="fas fa-qrcode"></i> View QR Code
                     </a>
                     {% endif %}
@@ -34,10 +34,10 @@
         
         {% if user.is_staff %}
         <div class="mt-3 d-grid gap-2">
-            <a href="{% url 'inventory:edit' pk=equipment.id %}" class="btn btn-primary">
+            <a href="{% url 'inventory:equipment_edit' pk=equipment.id %}" class="btn btn-primary">
                 <i class="fas fa-edit"></i> Edit Equipment
             </a>
-            <a href="{% url 'inventory:delete' pk=equipment.id %}" class="btn btn-danger">
+            <a href="{% url 'inventory:equipment_delete' pk=equipment.id %}" class="btn btn-danger">
                 <i class="fas fa-trash"></i> Delete Equipment
             </a>
         </div>

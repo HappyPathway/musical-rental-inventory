@@ -5,7 +5,7 @@
 {% block inventory_content %}
 <div class="row mb-4">
     <div class="col-md-8">
-        <form action="{% url 'inventory:list' %}" method="get" class="d-flex flex-wrap gap-2">
+        <form action="{% url 'inventory:equipment_list' %}" method="get" class="d-flex flex-wrap gap-2">
             <div class="input-group me-2 mb-2 mb-md-0" style="max-width: 250px;">
                 <input type="text" name="search" class="form-control" placeholder="Search..." value="{{ search_query }}">
                 <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></button>
@@ -30,15 +30,15 @@
             </select>
             
             <button type="submit" class="btn btn-primary mb-2 mb-md-0">Filter</button>
-            <a href="{% url 'inventory:list' %}" class="btn btn-outline-secondary mb-2 mb-md-0">Clear</a>
+            <a href="{% url 'inventory:equipment_list' %}" class="btn btn-outline-secondary mb-2 mb-md-0">Clear</a>
         </form>
     </div>
     <div class="col-md-4 text-md-end mt-3 mt-md-0">
         {% if user.is_staff %}
-        <a href="{% url 'inventory:add' %}" class="btn btn-success">
+        <a href="{% url 'inventory:equipment_add' %}" class="btn btn-success">
             <i class="fas fa-plus"></i> Add Equipment
         </a>
-        <a href="{% url 'inventory:scan' %}" class="btn btn-info">
+        <a href="{% url 'inventory:equipment_scan' %}" class="btn btn-info">
             <i class="fas fa-qrcode"></i> Scan QR
         </a>
         {% endif %}
@@ -76,7 +76,7 @@
                     </p>
                 </div>
                 <div class="card-footer bg-white border-top-0">
-                    <a href="{% url 'inventory:detail' pk=item.id %}" class="btn btn-sm btn-primary w-100">View Details</a>
+                    <a href="{% url 'inventory:equipment_detail' pk=item.id %}" class="btn btn-sm btn-primary w-100">View Details</a>
                 </div>
             </div>
         </div>
@@ -84,7 +84,7 @@
     {% else %}
         <div class="col-12">
             <div class="alert alert-info">
-                No equipment found matching your criteria. <a href="{% url 'inventory:list' %}">Clear filters</a> to see all equipment.
+                No equipment found matching your criteria. <a href="{% url 'inventory:equipment_list' %}">Clear filters</a> to see all equipment.
             </div>
         </div>
     {% endif %}
