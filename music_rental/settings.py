@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,6 +41,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites",
     
     # Third-party apps
     "crispy_forms",
@@ -45,9 +50,9 @@ INSTALLED_APPS = [
     "rest_framework",
     "allauth",
     "allauth.account",
-    "allauth.socialaccount",
     "widget_tweaks",
     "simple_history",
+    "storages",
     
     # Local apps
     "inventory.apps.InventoryConfig",
@@ -185,3 +190,37 @@ STATICFILES_DIRS.append(
 )
 
 ADMIN_MEDIA_PREFIX = '/static/'
+
+# AWS S3 Storage Configuration
+USE_S3 = os.environ.get('USE_S3', 'FALSE').upper() == 'TRUE'
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+
+# Only use S3 if proper credentials are configured
+if USE_S3 and AWS_ACCESS_KEY_ID:
+    # AWS Settings
+    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+    AWS_DEFAULT_ACL = 'public-read'
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
+    
+    # S3 Static settings
+    STATIC_LOCATION = 'static'
+    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{STATIC_LOCATION}/'
+    
+    # S3 Media settings
+    MEDIA_LOCATION = 'media'
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/'
+    DEFAULT_FILE_STORAGE = 'music_rental.storage_backends.MediaStorage'
+    
+    # Site domain for absolute URLs
+    SITE_DOMAIN = AWS_S3_CUSTOM_DOMAIN
+else:
+    # Use the default file system storage
+    SITE_DOMAIN = 'localhost:8000'
+
+# Configure the site framework with our domain
+SITE_ID = 1
+
+# OpenAI API settings
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')

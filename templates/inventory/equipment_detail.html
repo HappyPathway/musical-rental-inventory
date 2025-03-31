@@ -69,6 +69,24 @@
                     </div>
                 </div>
                 
+                {% if equipment.manual_file %}
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <div class="alert alert-info d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong><i class="fas fa-file-pdf me-2"></i> Equipment Manual Available</strong>
+                                {% if equipment.manual_title %}
+                                <div class="small mt-1">{{ equipment.manual_title }}</div>
+                                {% endif %}
+                            </div>
+                            <a href="{{ equipment.manual_file.url }}" class="btn btn-primary btn-sm" target="_blank">
+                                <i class="fas fa-download me-1"></i> Download Manual
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
                 <div class="row mb-3">
                     <div class="col-12">
                         <strong>Description:</strong>

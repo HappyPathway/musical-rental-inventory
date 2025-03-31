@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 from simple_history.models import HistoricalRecords
+from django.contrib.sites.models import Site
 import uuid
 import qrcode
 from io import BytesIO
@@ -50,6 +51,11 @@ class Equipment(models.Model):
     qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
     qr_uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     
+    # Manual related fields
+    manual_file = models.FileField(upload_to='manuals/', blank=True, null=True)
+    manual_title = models.CharField(max_length=255, blank=True, null=True)
+    manual_last_checked = models.DateTimeField(blank=True, null=True)
+    
     # Media related fields
     main_image = models.ImageField(upload_to='equipment_images/', blank=True, null=True)
     
@@ -71,6 +77,7 @@ class Equipment(models.Model):
     def save(self, *args, **kwargs):
         # Extract and pop our custom parameter before passing to super() method
         skip_qr = kwargs.pop('skip_qr', False)
+        skip_manual = kwargs.pop('skip_manual', False)
         
         # Save first to get an ID
         super().save(*args, **kwargs)
@@ -87,6 +94,17 @@ class Equipment(models.Model):
             except Exception as e:
                 # Log the error but don't block saving the equipment
                 print(f"Error generating QR code: {e}")
+                
+        # Fetch manual if needed
+        if not skip_manual and self.model_number and not self.manual_file:
+            from .utils import download_and_store_manual
+            try:
+                # This will update the equipment model directly if successful
+                download_and_store_manual(self)
+                self.manual_last_checked = timezone.now()
+                super().save(update_fields=['manual_last_checked'])
+            except Exception as e:
+                print(f"Error fetching manual: {e}")
     
     def generate_qr_code(self):
         qr = qrcode.QRCode(
@@ -95,7 +113,14 @@ class Equipment(models.Model):
             box_size=10,
             border=4,
         )
-        qr.add_data(f"{reverse('inventory:equipment_detail', args=[str(self.id)])}")
+        
+        # Get the current site's domain
+        domain = Site.objects.get_current().domain
+        
+        # Create the absolute URL with https protocol
+        url = f"https://{domain}{reverse('inventory:equipment_detail', args=[str(self.id)])}"
+        
+        qr.add_data(url)
         qr.make(fit=True)
         
         img = qr.make_image(fill_color="black", back_color="white")
@@ -123,9 +148,11 @@ class MaintenanceRecord(models.Model):
     description = models.TextField()
     cost = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     performed_by = models.CharField(max_length=100, blank=True)
-    
+    scheduled_date = models.DateField(blank=True, null=True, help_text="Date when maintenance is scheduled")
+    is_completed = models.BooleanField(default=False, help_text="Indicates if the maintenance is completed")
+
     def __str__(self):
-        return f"Maintenance for {self.equipment.name} on {self.date}"
+        return f"{self.equipment.name} - {self.date}"
 
 class SearchLog(models.Model):
     """Model to track search queries made by users."""

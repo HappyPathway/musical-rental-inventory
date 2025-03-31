@@ -112,16 +112,16 @@ test-selenium:
 	$(VENV_ACTIVATE) && ./run_selenium_tests.py --headless
 
 test-selenium-inventory:
-	$(VENV_ACTIVATE) && ./run_selenium_tests.py --headless tests/functional/test_inventory.py
+	$(VENV_ACTIVATE) && ./run_selenium_tests.py --headless tests.functional.test_inventory
 
 test-selenium-rentals:
-	$(VENV_ACTIVATE) && ./run_selenium_tests.py --headless tests/functional/test_rentals.py
+	$(VENV_ACTIVATE) && ./run_selenium_tests.py --headless tests.functional.test_rentals
 
 test-selenium-users:
-	$(VENV_ACTIVATE) && ./run_selenium_tests.py --headless tests/functional/test_users.py
+	$(VENV_ACTIVATE) && ./run_selenium_tests.py --headless tests.functional.test_users
 
 test-selenium-payments:
-	$(VENV_ACTIVATE) && ./run_selenium_tests.py --headless tests/functional/test_payments.py
+	$(VENV_ACTIVATE) && ./run_selenium_tests.py --headless tests.functional.test_payments
 
 # Visual browser tests (non-headless)
 test-selenium-visual:

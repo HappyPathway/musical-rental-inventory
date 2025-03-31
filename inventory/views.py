@@ -94,7 +94,7 @@ def equipment_add(request):
                 EquipmentAttachment.objects.create(equipment=equipment, file=f)
             
             messages.success(request, f'Equipment "{equipment.name}" has been added successfully.')
-            return redirect('inventory:detail', pk=equipment.pk)
+            return redirect('inventory:equipment_detail', pk=equipment.pk)
     else:
         form = EquipmentForm()
     
@@ -122,7 +122,7 @@ def equipment_edit(request, pk):
                 EquipmentAttachment.objects.create(equipment=equipment, file=f)
             
             messages.success(request, f'Equipment "{equipment.name}" has been updated successfully.')
-            return redirect('inventory:detail', pk=equipment.pk)
+            return redirect('inventory:equipment_detail', pk=equipment.pk)
     else:
         form = EquipmentForm(instance=equipment)
     
@@ -175,7 +175,7 @@ def equipment_qr(request, pk):
     )
     
     # QR code will link to the equipment detail page
-    url = request.build_absolute_uri(reverse('inventory:detail', args=[equipment.pk]))
+    url = request.build_absolute_uri(reverse('inventory:equipment_detail', args=[equipment.pk]))
     qr.add_data(url)
     qr.make(fit=True)
     
@@ -218,7 +218,7 @@ def equipment_scan_result(request):
             equipment_id = next((p for p in parts if p.isdigit()), None)
             
             if equipment_id:
-                return JsonResponse({'redirect_url': reverse('inventory:detail', args=[equipment_id])})
+                return JsonResponse({'redirect_url': reverse('inventory:equipment_detail', args=[equipment_id])})
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
     
@@ -243,7 +243,7 @@ def add_maintenance_record(request, pk):
                 equipment.status = 'maintenance'
                 equipment.save()
             
-            return redirect('inventory:detail', pk=equipment.pk)
+            return redirect('inventory:equipment_detail', pk=equipment.pk)
     else:
         form = MaintenanceRecordForm()
     
@@ -267,7 +267,7 @@ def add_attachment(request, pk):
             attachment.save()
             
             messages.success(request, 'Attachment added successfully.')
-            return redirect('inventory:detail', pk=equipment.pk)
+            return redirect('inventory:equipment_detail', pk=equipment.pk)
     else:
         form = AttachmentForm()
     

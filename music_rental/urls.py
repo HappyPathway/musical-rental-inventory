@@ -31,11 +31,11 @@ urlpatterns = [
     path("inventory/", include("inventory.urls")),
     path("rentals/", include("rentals.urls")),
     path("payments/", include("payments.urls")),
-    path("accounts/", include("allauth.urls")),
+    # path("accounts/", include("allauth.urls")), # Include allauth account management URLs
+    path("accounts/", include("allauth.account.urls")), # Use only account URLs, excluding social
     path("users/", include("users.urls")),
 ]
 
-# Serve media and static files in development
+# Serve media files in development (keep this)
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

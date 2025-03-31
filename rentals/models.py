@@ -86,6 +86,7 @@ class Rental(models.Model):
         return self.status == 'active'
     
     def is_overdue(self):
+        print(f"Checking overdue: end_date={self.end_date}, today={timezone.now().date()}, status={self.status}")
         return self.end_date < timezone.now().date() and self.status == 'active'
     
     def mark_as_returned(self):

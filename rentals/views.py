@@ -167,7 +167,32 @@ def remove_rental_item(request, rental_pk, item_pk):
 def rental_return(request, pk):
     """View to handle the return of a rental."""
     rental = get_object_or_404(Rental, pk=pk)
-    # Placeholder implementation
+
+    if request.method == 'POST':
+        # Inspect returned equipment
+        for item in rental.items.all():
+            item.returned = True
+            item.returned_date = timezone.now()
+            item.save()
+
+            # Update equipment status to available
+            equipment = item.equipment
+            equipment.status = 'available'
+            equipment.save()
+
+        # Calculate late fees if applicable
+        if rental.is_overdue():
+            overdue_days = (timezone.now().date() - rental.end_date).days
+            late_fee = overdue_days * Decimal('10.00')  # Example late fee per day
+            rental.total_price += late_fee
+            messages.warning(request, f'Late fee of ${late_fee:.2f} applied for {overdue_days} overdue days.')
+
+        # Mark rental as completed
+        rental.mark_as_returned()
+        messages.success(request, f'Rental #{rental.id} has been successfully returned.')
+
+        return redirect('rentals:rental_detail', pk=rental.id)
+
     context = {'rental': rental}
     return render(request, 'rentals/rental_return.html', context)
 
