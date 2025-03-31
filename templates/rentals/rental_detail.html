@@ -1,114 +1,256 @@
-{% extends "rentals/base_rentals.html" %}
-{% load rental_extras %}
+{% extends "base.html" %}
+{% load static %}
 
-{% block rentals_title %}Rental #{{ rental.id }}{% endblock %}
+{% block title %}Rental #{{ rental.id }} - ROKNSOUND{% endblock %}
 
-{% block rentals_content %}
-<div class="row justify-content-center">
-    <div class="col-md-10">
-        <div class="card shadow">
-            <div class="card-header bg-primary">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 text-white">Rental Details</h5>
-                    <div class="btn-group">
-                        {% if rental.status == 'active' or rental.status == 'overdue' %}
-                            <a href="{% url 'rentals:rental_return' rental.id %}" class="btn btn-accent">
-                                <i class="fas fa-undo"></i> Process Return
-                            </a>
-                            <a href="{% url 'rentals:rental_extend' rental.id %}" class="btn btn-accent ms-2">
-                                <i class="fas fa-clock"></i> Extend Rental
-                            </a>
-                        {% endif %}
-                        {% if rental.status == 'pending' %}
-                            <a href="{% url 'rentals:rental_cancel' rental.id %}" class="btn btn-danger">
-                                <i class="fas fa-times"></i> Cancel
-                            </a>
-                        {% endif %}
-                    </div>
+{% block extra_css %}
+<style>
+    .rental-status {
+        font-weight: bold;
+    }
+    .status-pending { color: #FFCE54; }
+    .status-active { color: #48CFAD; }
+    .status-overdue { color: #C23B23; }
+    .status-completed { color: #5D9CEC; }
+    .status-cancelled { color: #999999; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5">
+                Rental #{{ rental.id }}
+                <span class="rental-status status-{{ rental.status }}">
+                    ({{ rental.get_status_display }})
+                </span>
+            </h1>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'rentals:rental_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Rentals
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div class="row">
+        <div class="col-12">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <!-- Rental Information -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Rental Information</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <tr>
+                            <th>Start Date:</th>
+                            <td>{{ rental.start_date|date:"M d, Y" }}</td>
+                        </tr>
+                        <tr>
+                            <th>End Date:</th>
+                            <td>{{ rental.end_date|date:"M d, Y" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Duration:</th>
+                            <td>{{ rental.get_duration_type_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Total Price:</th>
+                            <td>${{ rental.total_price }}</td>
+                        </tr>
+                        <tr>
+                            <th>Deposit Required:</th>
+                            <td>${{ rental.deposit_total }}</td>
+                        </tr>
+                        <tr>
+                            <th>Deposit Status:</th>
+                            <td>
+                                {% if rental.deposit_paid %}
+                                <span class="badge bg-success">Paid</span>
+                                {% else %}
+                                <span class="badge bg-warning">Not Paid</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </table>
                 </div>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6>Customer Information</h6>
-                        <p><strong>Name:</strong> {{ rental.customer.get_full_name }}</p>
-                        <p><strong>Email:</strong> {{ rental.customer.email }}</p>
-                        <p><strong>Phone:</strong> {{ rental.customer.phone }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <h6>Rental Information</h6>
-                        <p><strong>Start Date:</strong> {{ rental.start_date }}</p>
-                        <p><strong>End Date:</strong> {{ rental.end_date }}</p>
-                        <p><strong>Status:</strong> 
-                            <span class="badge {% if rental.status == 'overdue' %}bg-danger
-                                           {% elif rental.status == 'active' %}bg-success
-                                           {% elif rental.status == 'completed' %}bg-info
-                                           {% elif rental.status == 'cancelled' %}bg-secondary
-                                           {% else %}bg-warning{% endif %}">
-                                {{ rental.status|title }}
+        </div>
+
+        <!-- Customer Information -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Customer Information</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <tr>
+                            <th>Name:</th>
+                            <td>{{ rental.customer.first_name }} {{ rental.customer.last_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Email:</th>
+                            <td>{{ rental.customer.email }}</td>
+                        </tr>
+                        <tr>
+                            <th>Phone:</th>
+                            <td>{{ rental.customer.phone }}</td>
+                        </tr>
+                        <tr>
+                            <th>Address:</th>
+                            <td>
+                                {{ rental.customer.address }}<br>
+                                {{ rental.customer.city }}, {{ rental.customer.state }} {{ rental.customer.zip_code }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>ID:</th>
+                            <td>{{ rental.customer.get_id_type_display }}: {{ rental.customer.id_number }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Equipment Items -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Rented Equipment</h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>Equipment</th>
+                        <th>Brand</th>
+                        <th>Serial Number</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in rental.items.all %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'inventory:equipment_detail' item.equipment.id %}">
+                                {{ item.equipment.name }}
+                            </a>
+                        </td>
+                        <td>{{ item.equipment.brand }}</td>
+                        <td>{{ item.equipment.serial_number }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>${{ item.price }}</td>
+                        <td>
+                            {% if item.returned %}
+                            <span class="badge bg-success">Returned</span>
+                            {% else %}
+                            <span class="badge bg-info">Out</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">No equipment items in this rental.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Payments -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Payment History</h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Type</th>
+                        <th>Method</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in rental.payments.all %}
+                    <tr>
+                        <td>{{ payment.payment_date|date:"M d, Y" }}</td>
+                        <td>${{ payment.amount }}</td>
+                        <td>{{ payment.get_payment_type_display }}</td>
+                        <td>{{ payment.get_payment_method_display }}</td>
+                        <td>
+                            <span class="badge {% if payment.status == 'completed' %}bg-success{% elif payment.status == 'pending' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                {{ payment.get_status_display }}
                             </span>
-                        </p>
-                    </div>
-                </div>
+                        </td>
+                        <td>{{ payment.notes }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">No payments recorded for this rental.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-                <div class="mt-4">
-                    <h6>Rented Equipment</h6>
-                    <div class="table-responsive">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Equipment</th>
-                                    <th>Serial Number</th>
-                                    <th>Price</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in rental.items.all %}
-                                <tr>
-                                    <td>{{ item.equipment.name }}</td>
-                                    <td>{{ item.equipment.serial_number }}</td>
-                                    <td>${{ item.price }}</td>
-                                    <td>
-                                        {% if item.returned %}
-                                            <span class="badge bg-success">Returned</span>
-                                        {% else %}
-                                            <span class="badge bg-info">Out</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td colspan="2" class="text-end"><strong>Total Price:</strong></td>
-                                    <td colspan="2">${{ rental.total_price }}</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="2" class="text-end"><strong>Deposit Total:</strong></td>
-                                    <td colspan="2">${{ rental.deposit_total }}</td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
+    <!-- Action Buttons -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Actions</h5>
                 </div>
-
-                {% if rental.notes %}
-                <div class="mt-4">
-                    <h6>Notes</h6>
-                    <p>{{ rental.notes|linebreaks }}</p>
-                </div>
-                {% endif %}
-
-                <div class="mt-4 d-flex justify-content-between">
-                    <a href="{% url 'rentals:rental_list' %}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Back to Rentals
-                    </a>
-                    {% if not rental.contract_signed and rental.status == 'pending' %}
-                        <a href="{% url 'rentals:rental_sign' rental.id %}" class="btn btn-primary">
-                            <i class="fas fa-signature"></i> Sign Contract
+                <div class="card-body">
+                    <div class="btn-group">
+                        <a href="{% url 'rentals:rental_edit' rental.id %}" class="btn btn-primary">
+                            <i class="fas fa-edit"></i> Edit Rental
                         </a>
-                    {% endif %}
+                        
+                        {% if rental.status == 'pending' or rental.status == 'active' %}
+                        <a href="{% url 'payments:create' rental.id %}" class="btn btn-success">
+                            <i class="fas fa-money-bill-wave"></i> Make Payment
+                        </a>
+                        {% endif %}
+                        
+                        {% if rental.status == 'active' %}
+                        <a href="{% url 'rentals:rental_return' rental.id %}" class="btn btn-info">
+                            <i class="fas fa-undo"></i> Process Return
+                        </a>
+                        {% endif %}
+                        
+                        {% if rental.status == 'pending' %}
+                        <a href="{% url 'rentals:rental_cancel' rental.id %}" class="btn btn-danger">
+                            <i class="fas fa-times"></i> Cancel Rental
+                        </a>
+                        {% endif %}
+                        
+                        <a href="{% url 'rentals:rental_contract' rental.id %}" class="btn btn-secondary">
+                            <i class="fas fa-file-contract"></i> View Contract
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

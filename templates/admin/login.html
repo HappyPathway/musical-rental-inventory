@@ -1,0 +1,66 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('ROKNSOUND Admin') }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">ROKNSOUND</a></h1>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card bg-dark">
+        <div class="card-header bg-gradient" style="background: linear-gradient(to right, #C23B23, #3A3A3A);">
+          <h4 class="text-center text-light mb-0">{% trans 'Admin Login' %}</h4>
+        </div>
+        <div class="card-body p-4">
+          {% if form.errors and not form.non_field_errors %}
+          <div class="alert alert-danger" role="alert">
+            {% if form.errors.items|length == 1 %}{% trans "Please correct the error below." %}{% else %}{% trans "Please correct the errors below." %}{% endif %}
+          </div>
+          {% endif %}
+
+          {% if form.non_field_errors %}
+          {% for error in form.non_field_errors %}
+          <div class="alert alert-danger" role="alert">
+            {{ error }}
+          </div>
+          {% endfor %}
+          {% endif %}
+
+          <form action="{{ app_path }}" method="post" id="login-form">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="{{ form.username.id_for_label }}" class="form-label text-light">{{ form.username.label }}</label>
+              {{ form.username }}
+            </div>
+            <div class="mb-3">
+              <label for="{{ form.password.id_for_label }}" class="form-label text-light">{{ form.password.label }}</label>
+              {{ form.password }}
+            </div>
+            {% if form.username.errors %}
+              <div class="invalid-feedback d-block">{{ form.username.errors }}</div>
+            {% endif %}
+            {% if form.password.errors %}
+              <div class="invalid-feedback d-block">{{ form.password.errors }}</div>
+            {% endif %}
+            <div class="d-grid gap-2 mt-4">
+              <input type="submit" class="btn btn-lg" value="{% trans 'Log in' %}" style="background: linear-gradient(to bottom, #C23B23, #FFCE54); color: #121212; font-weight: bold; text-transform: uppercase;">
+            </div>
+            <input type="hidden" name="next" value="{{ next }}">
+          </form>
+
+          {% url 'admin_password_reset' as password_reset_url %}
+          {% if password_reset_url %}
+          <div class="text-center mt-3">
+            <a href="{{ password_reset_url }}" class="text-warning">{% trans 'Forgotten your password or username?' %}</a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

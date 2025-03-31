@@ -138,7 +138,7 @@
         
         {% if equipment.is_available %}
         <div class="d-grid gap-2">
-            <a href="{% url 'rentals:create' %}?equipment={{ equipment.id }}" class="btn btn-lg btn-success">
+            <a href="{% url 'rentals:rental_create' %}?equipment={{ equipment.id }}" class="btn btn-lg btn-success">
                 <i class="fas fa-shopping-cart"></i> Rent This Equipment
             </a>
         </div>

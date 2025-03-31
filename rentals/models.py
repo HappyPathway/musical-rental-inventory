@@ -80,7 +80,7 @@ class Rental(models.Model):
         return f"Rental #{self.id} - {self.customer}"
     
     def get_absolute_url(self):
-        return reverse('rentals:detail', args=[str(self.id)])
+        return reverse('rentals:rental_detail', args=[str(self.id)])
     
     def is_active(self):
         return self.status == 'active'
@@ -98,16 +98,27 @@ class Rental(models.Model):
         self.save()
     
     def calculate_total_price(self):
-        total = sum(item.price for item in self.items.all())
+        total = sum(item.price * item.quantity for item in self.items.all())
         return total
     
     def calculate_deposit_total(self):
-        total = sum(item.equipment.deposit_amount for item in self.items.all())
+        total = sum(item.equipment.deposit_amount * item.quantity for item in self.items.all())
         return total
+        
+    @property
+    def amount_paid(self):
+        # Calculate the total amount paid through payments
+        return sum(payment.amount for payment in self.payments.filter(status='completed'))
+    
+    @property
+    def balance_due(self):
+        # Calculate the remaining balance
+        return self.total_price - self.amount_paid
 
 class RentalItem(models.Model):
     rental = models.ForeignKey(Rental, on_delete=models.CASCADE, related_name='items')
     equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     condition_note_checkout = models.TextField(blank=True)
     condition_note_return = models.TextField(blank=True)
@@ -115,7 +126,7 @@ class RentalItem(models.Model):
     returned_date = models.DateTimeField(blank=True, null=True)
     
     def __str__(self):
-        return f"{self.equipment.name} for {self.rental}"
+        return f"{self.quantity}x {self.equipment.name} for {self.rental}"
     
     def save(self, *args, **kwargs):
         # Update equipment status if this is a new rental item

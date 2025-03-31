@@ -20,6 +20,10 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
+from .admin_site import roknsound_admin_site
+
+# Use our custom admin site
+admin.site = roknsound_admin_site
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -27,6 +31,7 @@ urlpatterns = [
     path("inventory/", include("inventory.urls")),
     path("rentals/", include("rentals.urls")),
     path("payments/", include("payments.urls")),
+    path("accounts/", include("allauth.urls")),
     path("users/", include("users.urls")),
 ]
 

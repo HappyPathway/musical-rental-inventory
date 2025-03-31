@@ -1,103 +1,75 @@
 from django import forms
-from .models import Rental, RentalItem, Customer, Contract
+from django.utils import timezone
+from .models import Customer, Rental, RentalItem
 from inventory.models import Equipment
-from django.forms import ModelForm
-from decimal import Decimal
 
-class RentalForm(ModelForm):
+class CustomerForm(forms.ModelForm):
+    class Meta:
+        model = Customer
+        fields = ['first_name', 'last_name', 'email', 'phone', 'address', 
+                  'city', 'state', 'zip_code', 'id_type', 'id_number', 'id_image', 'notes']
+        widgets = {
+            'notes': forms.Textarea(attrs={'rows': 3}),
+            'address': forms.Textarea(attrs={'rows': 2}),
+        }
+
+class RentalForm(forms.ModelForm):
     class Meta:
         model = Rental
         fields = ['customer', 'start_date', 'end_date', 'duration_type', 'notes']
         widgets = {
-            'start_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'end_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'duration_type': forms.Select(attrs={'class': 'form-control'}),
-            'customer': forms.Select(attrs={'class': 'form-control'}),
-            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'start_date': forms.DateInput(attrs={'type': 'date', 'min': timezone.now().date()}),
+            'end_date': forms.DateInput(attrs={'type': 'date', 'min': timezone.now().date()}),
+            'notes': forms.Textarea(attrs={'rows': 3}),
         }
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        start_date = cleaned_data.get('start_date')
+        end_date = cleaned_data.get('end_date')
+        
+        if start_date and end_date and end_date < start_date:
+            raise forms.ValidationError("End date cannot be before start date")
+        
+        return cleaned_data
 
-class RentalItemForm(forms.Form):
+class RentalItemForm(forms.ModelForm):
     equipment = forms.ModelChoiceField(
         queryset=Equipment.objects.filter(status='available'),
-        widget=forms.Select(attrs={'class': 'form-control'})
+        widget=forms.Select(attrs={'class': 'select2'})
     )
-    price = forms.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'})
-    )
-
-class RentalReturnForm(forms.Form):
-    CONDITION_CHOICES = [
-        ('excellent', 'Excellent - Like New'),
-        ('good', 'Good - Minor Wear'),
-        ('fair', 'Fair - Noticeable Wear'),
-        ('poor', 'Poor - Significant Damage'),
-        ('damaged', 'Damaged - Requires Repair')
-    ]
-
-    condition = forms.ChoiceField(
-        choices=CONDITION_CHOICES,
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
-    condition_notes = forms.CharField(
-        widget=forms.Textarea(attrs={
-            'class': 'form-control',
-            'rows': 3,
-            'placeholder': 'Describe any damage or issues...'
-        }),
-        required=False
-    )
-    late_fees = forms.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        initial=Decimal('0.00'),
-        widget=forms.NumberInput(attrs={
-            'class': 'form-control',
-            'step': '0.01'
-        })
-    )
-    damage_fees = forms.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        initial=Decimal('0.00'),
-        widget=forms.NumberInput(attrs={
-            'class': 'form-control',
-            'step': '0.01'
-        })
-    )
-    refund_deposit = forms.BooleanField(
-        initial=True,
-        required=False,
-        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
-    )
-
-class RentalExtensionForm(forms.Form):
-    new_end_date = forms.DateField(
-        widget=forms.DateInput(attrs={
-            'type': 'date',
-            'class': 'form-control'
-        })
-    )
-    extension_notes = forms.CharField(
-        widget=forms.Textarea(attrs={
-            'class': 'form-control',
-            'rows': 3,
-            'placeholder': 'Reason for extension...'
-        }),
-        required=False
-    )
-
-class ContractForm(forms.Form):
-    signature = forms.CharField(
-        widget=forms.HiddenInput(attrs={
-            'class': 'signature-data'
-        })
+    quantity = forms.IntegerField(
+        min_value=1, 
+        initial=1,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '1'})
     )
     
+    class Meta:
+        model = RentalItem
+        fields = ['equipment', 'quantity', 'price', 'condition_note_checkout']
+        widgets = {
+            'condition_note_checkout': forms.Textarea(attrs={'rows': 2}),
+        }
+
+class EquipmentSearchForm(forms.Form):
+    query = forms.CharField(required=False, widget=forms.TextInput(attrs={
+        'placeholder': 'Search by name, category, or serial number'
+    }))
+    category = forms.CharField(required=False)
+    available_only = forms.BooleanField(required=False, initial=True)
+
+class ReturnRentalItemForm(forms.ModelForm):
+    class Meta:
+        model = RentalItem
+        fields = ['condition_note_return']
+        widgets = {
+            'condition_note_return': forms.Textarea(attrs={'rows': 2}),
+        }
+
+class ContractSignatureForm(forms.Form):
+    signature = forms.CharField(widget=forms.HiddenInput())
     agree_to_terms = forms.BooleanField(
-        label='I agree to the terms and conditions of this rental contract',
-        widget=forms.CheckboxInput(attrs={
-            'class': 'form-check-input'
-        })
+        required=True,
+        widget=forms.CheckboxInput(),
+        label="I agree to the terms and conditions of this rental contract"
     )

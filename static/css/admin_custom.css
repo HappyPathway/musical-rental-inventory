@@ -1,175 +1,322 @@
-/* Custom styles for the Django admin interface */
+/* ROKNSOUND Admin Styles - Dark Theme */
 
-/* General styling */
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+/* Core colors */
+:root {
+  --primary: #3A3A3A;
+  --secondary: #121212;
+  --accent: #C23B23;
+  --highlight: #FFCE54;
+  --text: #FFFFFF;
+  --dark-gray: #1E1E1E;
+  --mid-gray: #2A2A2A;
+  --light-gray: #3A3A3A;
+  --success: #48CFAD;
+  --info: #5D9CEC;
+  --warning: #FFCE54;
+  --danger: #C23B23;
 }
 
-/* Improve form styling */
+/* Base elements */
+body, #container {
+  background-color: var(--secondary) !important;
+  color: var(--text) !important;
+}
+
+/* Header styling */
+#header {
+  background-color: var(--dark-gray) !important;
+  color: var(--text) !important;
+  border-bottom: 2px solid var(--accent) !important;
+}
+
+#branding h1, #branding h1 a:link, #branding h1 a:visited {
+  color: var(--text) !important;
+}
+
+#user-tools {
+  color: var(--text) !important;
+}
+
+#user-tools a {
+  color: var(--highlight) !important;
+  opacity: 0.8;
+}
+
+#user-tools a:hover {
+  opacity: 1;
+}
+
+/* Breadcrumbs */
+div.breadcrumbs {
+  background-color: var(--light-gray) !important;
+  color: var(--text) !important;
+  border-bottom: 1px solid var(--accent) !important;
+}
+
+div.breadcrumbs a {
+  color: var(--highlight) !important;
+  opacity: 0.8;
+}
+
+div.breadcrumbs a:hover {
+  opacity: 1;
+}
+
+/* Main content */
+.module, .dashboard .module {
+  background-color: var(--mid-gray) !important;
+  border: 1px solid var(--light-gray) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.module h2, .module caption, .inline-group h2 {
+  background-color: var(--light-gray) !important;
+  color: var(--text) !important;
+  font-weight: normal !important;
+  border-bottom: 1px solid var(--accent) !important;
+}
+
+/* Links */
+a:link, a:visited {
+  color: var(--highlight) !important;
+  opacity: 0.8;
+  text-decoration: none !important;
+}
+
+a:hover {
+  opacity: 1;
+}
+
+/* Tables */
+.row1 {
+  background-color: var(--dark-gray) !important;
+}
+
+.row2 {
+  background-color: var(--mid-gray) !important;
+}
+
+thead th, tfoot td {
+  background-color: var(--light-gray) !important;
+  color: var(--text) !important;
+  border-top: 1px solid var(--accent) !important;
+}
+
+table tbody tr:hover {
+  background-color: rgba(255, 206, 84, 0.1) !important;
+}
+
+/* Form elements */
 .form-row {
-    padding: 8px 12px;
-    border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid rgba(58, 58, 58, 0.3) !important;
+  padding: 1rem 0 !important;
 }
 
-.form-row label {
-    font-weight: 500;
+label {
+  color: var(--text) !important;
 }
 
-/* Table styling */
-#result_list {
-    width: 100%;
-    border-collapse: collapse;
+/* Make form fields have white backgrounds with dark text for better contrast */
+input[type="text"], input[type="password"], input[type="email"], 
+input[type="number"], input[type="url"], input[type="tel"], textarea, 
+.vTextField, select, .select2-container .select2-selection--single {
+  background-color: #FFFFFF !important;
+  color: #121212 !important;
+  border: 1px solid var(--light-gray) !important;
+  border-radius: 3px !important;
+  padding: 8px !important;
 }
 
-#result_list th {
-    background-color: #f8f9fa;
-    padding: 10px;
-    border-bottom: 2px solid #dee2e6;
+input[type="text"]:focus, input[type="password"]:focus, 
+input[type="email"]:focus, input[type="number"]:focus, 
+input[type="url"]:focus, input[type="tel"]:focus, 
+textarea:focus, .vTextField:focus, select:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 5px rgba(194, 59, 35, 0.5) !important;
 }
 
-#result_list td {
-    padding: 10px;
-    border-bottom: 1px solid #dee2e6;
+/* Buttons */
+.button, input[type="submit"], input[type="button"], 
+.submit-row input, a.button {
+  background-color: var(--light-gray) !important;
+  color: var(--text) !important;
+  border: none !important;
+  border-radius: 3px !important;
+  font-weight: normal !important;
+  padding: 8px 15px !important;
+  text-transform: none !important;
 }
 
-#result_list tr:hover {
-    background-color: #f8f9fa;
+.button:hover, input[type="submit"]:hover, 
+input[type="button"]:hover, .submit-row input:hover {
+  background-color: var(--accent) !important;
 }
 
-/* Dashboard improvements */
-.dashboard .module {
-    border-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    border: 1px solid #dee2e6;
-    margin-bottom: 20px;
+.button.default, input[type="submit"].default, 
+.submit-row input.default {
+  background-color: var(--accent) !important;
+  font-weight: bold !important;
 }
 
-.dashboard .module h2 {
-    border-radius: 4px 4px 0 0;
-    padding: 10px 15px;
+.button.default:hover, input[type="submit"].default:hover, 
+.submit-row input.default:hover {
+  background-color: #A32A1F !important;
 }
 
-/* Improve action buttons */
-.object-tools {
-    margin-top: 15px;
+/* Submit row */
+.submit-row {
+  background-color: var(--mid-gray) !important;
+  border: 1px solid var(--light-gray) !important;
 }
 
-.object-tools a {
-    border-radius: 4px;
-    padding: 6px 12px;
-    font-weight: normal;
+/* Messages */
+ul.messagelist li {
+  background-color: var(--mid-gray) !important;
+  border-left: 5px solid var(--info) !important;
+  color: var(--text) !important;
+  margin: 0.5rem 0 !important;
 }
 
-/* Fix for related widget wrapper */
-.related-widget-wrapper {
-    display: flex;
-    align-items: center;
+ul.messagelist li.success {
+  border-left-color: var(--success) !important;
 }
 
-.related-widget-wrapper a {
-    margin-left: 8px;
+ul.messagelist li.warning {
+  border-left-color: var(--warning) !important;
 }
 
-/* Better file upload styling */
-.file-upload {
-    margin-top: 5px;
+ul.messagelist li.error {
+  border-left-color: var(--danger) !important;
 }
 
-.file-upload a {
-    display: inline-block;
-    margin-top: 5px;
+/* Paginator */
+.paginator {
+  background-color: var(--mid-gray) !important;
+  color: var(--text) !important;
+  border-top: 1px solid var(--light-gray) !important;
 }
 
-/* Improve datetime widget */
-.datetime {
+.paginator a:link, .paginator a:visited {
+  background-color: var(--light-gray) !important;
+  color: var(--text) !important;
+}
+
+.paginator a:hover {
+  background-color: var(--accent) !important;
+}
+
+/* Login form */
+.login {
+  background-color: var(--secondary) !important;
+}
+
+.login #container {
+  background-color: var(--mid-gray) !important;
+  border: 1px solid var(--light-gray) !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3) !important;
+}
+
+.login .form-row {
+  padding: 0.5rem !important;
+}
+
+.login .form-row label {
+  color: var(--text) !important;
+}
+
+.login .submit-row {
+  padding: 0.5rem !important;
+  background: none !important;
+  border: none !important;
+}
+
+/* Inlines */
+.inline-related {
+  background-color: var(--mid-gray) !important;
+  border: 1px solid var(--light-gray) !important;
+}
+
+.inline-related h3 {
+  background-color: var(--light-gray) !important;
+  color: var(--text) !important;
+}
+
+/* Object tools */
+.object-tools a:link, .object-tools a:visited {
+  background-color: var(--light-gray) !important;
+  color: var(--text) !important;
+  border-radius: 3px !important;
+}
+
+.object-tools a:hover {
+  background-color: var(--accent) !important;
+}
+
+/* Admin Form Alignment Fix */
+.aligned .form-row {
     display: flex;
     flex-wrap: wrap;
+    align-items: flex-start;
+    padding: 1rem 0;
+    overflow: hidden;
 }
 
-.datetime br {
-    display: none;
+.aligned .form-row > div.fieldBox {
+    flex: 1 1 300px;
+    margin-right: 20px;
 }
 
-/* Improve filter sidebar */
-#changelist-filter h2 {
-    border-radius: 4px 4px 0 0;
+.aligned label {
+    display: block;
+    width: 100%;
+    padding: 0.25rem 0;
+    margin-bottom: 0.25rem;
+    color: #FFFFFF !important;
 }
 
-#changelist-filter ul {
-    padding: 0;
-    margin: 0;
+.aligned input, 
+.aligned textarea, 
+.aligned select, 
+.aligned .select2-container {
+    width: 100%;
+    max-width: 500px;
 }
 
-#changelist-filter li {
-    list-style-type: none;
-    padding: 8px 15px;
-    border-bottom: 1px solid #eee;
+/* Fix admin login form */
+.login #container {
+    padding: 30px;
+    width: 400px;
+    margin: 100px auto;
 }
 
-#changelist-filter li:last-child {
-    border-bottom: none;
+.login .form-row {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.5rem;
 }
 
-/* Fix for inline forms */
-.inline-group {
-    border-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    border: 1px solid #dee2e6;
-    margin-bottom: 20px;
-}
-
-.inline-group h2 {
-    border-radius: 4px 4px 0 0;
-}
-
-.inline-related {
-    border-bottom: 1px solid #eee;
-    padding: 10px;
-}
-
-.inline-related:last-child {
-    border-bottom: none;
-}
-
-/* Improve buttons */
-.button, input[type=submit], input[type=button], .submit-row input, a.button {
-    border-radius: 4px;
-    border: none;
-    padding: 8px 16px;
+.login .form-row label {
+    margin-bottom: 0.5rem;
+    color: #FFFFFF !important;
     font-weight: 500;
-    text-transform: none;
-    transition: background-color 0.2s;
 }
 
-/* Style submit row better */
-.submit-row {
-    background: #f8f9fa;
-    border-top: 1px solid #eee;
-    border-radius: 0 0 4px 4px;
-    padding: 15px;
+/* Fix grid in change forms */
+.module .aligned .form-row {
+    padding: 12px 0;
+    margin-bottom: 0;
 }
 
-/* Icon styling to match site design */
-.fas.fa-info-circle {
-    color: #FFCE54; /* VU Yellow - matches the site's accent color */
+/* Special case for inlines */
+.inline-group .aligned .form-row {
+    margin-left: 0;
+    padding: 10px 0;
 }
 
-.alert-info .fas.fa-info-circle {
-    color: #F0E6D2; /* Off-White - for better contrast in info alerts */
-}
-
-.alert-warning .fas.fa-info-circle,
-.alert-warning .fas.fa-exclamation-triangle {
-    color: #FFCE54; /* VU Yellow - matches the site's accent color */
-}
-
-.alert-danger .fas.fa-info-circle,
-.alert-danger .fas.fa-exclamation-triangle {
-    color: #C23B23; /* Distressed Red - for danger/warning contexts */
-}
-
-/* Make icons properly aligned with text */
-.fas.me-2 {
-    vertical-align: middle;
-    margin-top: -3px; /* Fine-tune vertical alignment */
+/* Ensure proper spacing */
+.form-row .help {
+    margin-top: 5px;
+    margin-left: 0;
+    color: #aaaaaa !important;
 }

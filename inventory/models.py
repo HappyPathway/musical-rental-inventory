@@ -66,13 +66,27 @@ class Equipment(models.Model):
         return f"{self.name} ({self.brand})"
     
     def get_absolute_url(self):
-        return reverse('inventory:detail', args=[str(self.id)])
+        return reverse('inventory:equipment_detail', args=[str(self.id)])
     
     def save(self, *args, **kwargs):
-        # Generate QR code if it doesn't exist
-        if not self.qr_code:
-            self.generate_qr_code()
+        # Extract and pop our custom parameter before passing to super() method
+        skip_qr = kwargs.pop('skip_qr', False)
+        
+        # Save first to get an ID
         super().save(*args, **kwargs)
+        
+        # Only generate QR code if:
+        # 1. We don't already have one
+        # 2. We're not explicitly skipping QR generation
+        # 3. We have an ID (needed for QR URL)
+        if not self.qr_code and not skip_qr and self.id:
+            try:
+                self.generate_qr_code()
+                # Save again with the QR code, but avoid another full save by specifying update_fields
+                super().save(update_fields=['qr_code'])
+            except Exception as e:
+                # Log the error but don't block saving the equipment
+                print(f"Error generating QR code: {e}")
     
     def generate_qr_code(self):
         qr = qrcode.QRCode(
@@ -81,7 +95,7 @@ class Equipment(models.Model):
             box_size=10,
             border=4,
         )
-        qr.add_data(f"{reverse('inventory:detail', args=[str(self.id)])}")
+        qr.add_data(f"{reverse('inventory:equipment_detail', args=[str(self.id)])}")
         qr.make(fit=True)
         
         img = qr.make_image(fill_color="black", back_color="white")

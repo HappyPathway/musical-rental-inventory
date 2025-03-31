@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Make Payment - ROKNSOUND{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5">Make Payment for Rental #{{ rental.id }}</h1>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'rentals:rental_detail' rental.id %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Rental
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div class="row">
+        <div class="col-12">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Payment Details</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="payment-form">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="payment_type" class="form-label">Payment Type</label>
+                            <select class="form-select" id="payment_type" name="payment_type" required>
+                                <option value="rental">Rental Payment</option>
+                                <option value="deposit">Security Deposit</option>
+                                <option value="late_fee">Late Fee</option>
+                                <option value="damage_fee">Damage Fee</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="amount" class="form-label">Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="amount" name="amount" step="0.01" min="0.01" value="{{ rental.balance_due }}" required>
+                            </div>
+                            <div class="form-text">
+                                Total Amount Due: ${{ rental.total_price }} | Already Paid: ${{ rental.amount_paid }} | Balance: ${{ rental.balance_due }}
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="payment_method" class="form-label">Payment Method</label>
+                            <select class="form-select" id="payment_method" name="payment_method" required>
+                                <option value="paypal">PayPal</option>
+                                <option value="stripe">Credit Card</option>
+                                <option value="venmo">Venmo</option>
+                                <option value="cash">Cash</option>
+                                <option value="check">Check</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="payment-methods">
+                            <!-- PayPal option -->
+                            <div id="paypal-method" class="payment-method-options">
+                                <div class="d-grid gap-2 mb-3">
+                                    <a href="{% url 'payments:paypal_create' rental.id %}" class="btn btn-primary">
+                                        <i class="fab fa-paypal"></i> Pay with PayPal
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <!-- Stripe option -->
+                            <div id="stripe-method" class="payment-method-options" style="display:none;">
+                                <div class="d-grid gap-2 mb-3">
+                                    <a href="{% url 'payments:stripe_create' rental.id %}" class="btn btn-primary">
+                                        <i class="fab fa-cc-stripe"></i> Pay with Credit Card
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <!-- Venmo option -->
+                            <div id="venmo-method" class="payment-method-options" style="display:none;">
+                                <div class="d-grid gap-2 mb-3">
+                                    <a href="{% url 'payments:venmo_create' rental.id %}" class="btn btn-primary">
+                                        <i class="fab fa-vimeo-v"></i> Pay with Venmo
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <!-- Cash/Check/Other option -->
+                            <div id="manual-method" class="payment-method-options" style="display:none;">
+                                <div class="d-grid gap-2 mb-3">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-money-bill-wave"></i> Record Manual Payment
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Rental Summary</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <tr>
+                            <th>Rental ID:</th>
+                            <td>#{{ rental.id }}</td>
+                        </tr>
+                        <tr>
+                            <th>Customer:</th>
+                            <td>{{ rental.customer.first_name }} {{ rental.customer.last_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Start Date:</th>
+                            <td>{{ rental.start_date|date:"M d, Y" }}</td>
+                        </tr>
+                        <tr>
+                            <th>End Date:</th>
+                            <td>{{ rental.end_date|date:"M d, Y" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Status:</th>
+                            <td>
+                                <span class="status-{{ rental.status }}">
+                                    {{ rental.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Total Price:</th>
+                            <td>${{ rental.total_price }}</td>
+                        </tr>
+                        <tr>
+                            <th>Amount Paid:</th>
+                            <td>${{ rental.amount_paid }}</td>
+                        </tr>
+                        <tr>
+                            <th>Balance Due:</th>
+                            <td>${{ rental.balance_due }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Show/hide payment method options based on selection
+    document.addEventListener('DOMContentLoaded', function() {
+        const paymentMethodSelect = document.getElementById('payment_method');
+        const paymentMethods = {
+            'paypal': document.getElementById('paypal-method'),
+            'stripe': document.getElementById('stripe-method'),
+            'venmo': document.getElementById('venmo-method'),
+            'cash': document.getElementById('manual-method'),
+            'check': document.getElementById('manual-method'),
+            'other': document.getElementById('manual-method')
+        };
+        
+        // Show the initial payment method
+        updatePaymentMethodDisplay();
+        
+        // Update when payment method changes
+        paymentMethodSelect.addEventListener('change', updatePaymentMethodDisplay);
+        
+        function updatePaymentMethodDisplay() {
+            // Hide all payment method options
+            Object.values(paymentMethods).forEach(el => {
+                if (el) el.style.display = 'none';
+            });
+            
+            // Show the selected payment method options
+            const selectedMethod = paymentMethodSelect.value;
+            if (paymentMethods[selectedMethod]) {
+                paymentMethods[selectedMethod].style.display = 'block';
+            }
+        }
+    });
+</script>
+{% endblock %}

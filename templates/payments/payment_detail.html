@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Payment Details - ROKNSOUND{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5">Payment #{{ payment.id }}</h1>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'payments:list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Payments
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div class="row">
+        <div class="col-12">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Payment Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Payment ID:</div>
+                        <div class="col-md-8">{{ payment.id }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Date:</div>
+                        <div class="col-md-8">{{ payment.payment_date|date:"F d, Y" }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Amount:</div>
+                        <div class="col-md-8">${{ payment.amount }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Payment Type:</div>
+                        <div class="col-md-8">{{ payment.get_payment_type_display }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Payment Method:</div>
+                        <div class="col-md-8">{{ payment.get_payment_method_display }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Status:</div>
+                        <div class="col-md-8">
+                            <span class="badge {% if payment.status == 'completed' %}bg-success{% elif payment.status == 'pending' %}bg-warning{% elif payment.status == 'failed' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                {{ payment.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                    {% if payment.transaction_id %}
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Transaction ID:</div>
+                        <div class="col-md-8">{{ payment.transaction_id }}</div>
+                    </div>
+                    {% endif %}
+                    {% if payment.notes %}
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Notes:</div>
+                        <div class="col-md-8">{{ payment.notes }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Rental Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6 fw-bold">Rental ID:</div>
+                        <div class="col-md-6">
+                            <a href="{% url 'rentals:rental_detail' payment.rental.id %}">
+                                #{{ payment.rental.id }}
+                            </a>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6 fw-bold">Customer:</div>
+                        <div class="col-md-6">{{ payment.rental.customer }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6 fw-bold">Start Date:</div>
+                        <div class="col-md-6">{{ payment.rental.start_date|date:"M d, Y" }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6 fw-bold">End Date:</div>
+                        <div class="col-md-6">{{ payment.rental.end_date|date:"M d, Y" }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6 fw-bold">Total Price:</div>
+                        <div class="col-md-6">${{ payment.rental.total_price }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6 fw-bold">Amount Paid:</div>
+                        <div class="col-md-6">${{ payment.rental.amount_paid }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6 fw-bold">Balance Due:</div>
+                        <div class="col-md-6">${{ payment.rental.balance_due }}</div>
+                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{% url 'rentals:rental_detail' payment.rental.id %}" class="btn btn-primary">
+                        View Rental Details
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

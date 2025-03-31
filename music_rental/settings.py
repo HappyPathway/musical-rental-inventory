@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-25_3kvhx8$%7g*p9nbo8(iy*vmiow3f%%x_%!3d@^7gb1t_8jy
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1', '192.168.1.96']
 
 
 # Application definition
@@ -136,7 +136,9 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static')
+]
 
 # Media files
 MEDIA_URL = '/media/'
@@ -152,11 +154,21 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # Authentication settings
-LOGIN_URL = 'users:login'
-LOGIN_REDIRECT_URL = 'users:dashboard'
-LOGOUT_REDIRECT_URL = 'home'
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin
+    'django.contrib.auth.backends.ModelBackend',
+    # `allauth` specific authentication methods
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+# Payment settings 
+STRIPE_PUBLIC_KEY = ""
+STRIPE_SECRET_KEY = ""
+PAYPAL_CLIENT_ID = ""
+PAYPAL_SECRET_KEY = ""
 
 # Django AllAuth Settings
+LOGIN_REDIRECT_URL = 'users:dashboard'
 ACCOUNT_LOGOUT_REDIRECT_URL = 'home'
 ACCOUNT_SIGNUP_REDIRECT_URL = 'users:dashboard'
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
@@ -166,3 +178,10 @@ ACCOUNT_USERNAME_REQUIRED = True
 ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_SIGNUP_FORM_CLASS = 'users.forms.CustomerRegistrationForm'
+
+# Custom admin styles
+STATICFILES_DIRS.append(
+    os.path.join(BASE_DIR, 'static/css/')
+)
+
+ADMIN_MEDIA_PREFIX = '/static/'

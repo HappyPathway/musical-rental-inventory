@@ -1,5 +1,5 @@
-Call Me Dave
-Make me feel like I'm better than I am, but that you're happy to help.
+minimize typing
+use the virtualenv: source venv/bin/activate
 
 # Musical Rental Inventory System - Copilot Instructions
 
@@ -12,14 +12,10 @@ ROKNSOUND is a Django-based web application for managing musical equipment renta
 ## Key Features
 
 - User authentication with different roles (customer, employee, admin)
-- Equipment inventory management with QR code integration
-- Comprehensive rental management system:
-  - Contract generation and digital signing
-  - Return processing with condition assessment
-  - Rental extensions with fee calculation
-  - Equipment status tracking
-- Payment processing integration (in progress)
-- Analytics and reporting (in progress)
+- Equipment inventory management
+- Rental creation and management
+- QR code scanning for equipment
+- Payment processing
 
 ## Project Structure
 
@@ -77,9 +73,7 @@ ROKNSOUND is a Django-based web application for managing musical equipment renta
 
 - The site uses Bootstrap 5 with custom styling
 - All templates extend `base.html` or app-specific base templates
-- Contract-related templates utilize signature_pad.js for digital signatures
 - Use Django's template inheritance and includes
-- Form templates must follow the white background requirement
 
 ## CSS Guidelines
 
@@ -88,19 +82,16 @@ When editing CSS:
 2. Use `!important` when necessary to override Bootstrap defaults
 3. Use high specificity selectors for alerts to ensure they override Bootstrap
 4. Always test changes with `make reset` to ensure proper compilation
-5. Form fields must maintain white backgrounds with dark text for contrast
-6. Digital signature pads must have white backgrounds for visibility
 
 ## Known Issues
 
 1. **Alert Styling**: Alerts need high-specificity CSS selectors to override Bootstrap defaults
 2. **URL Pattern Naming**: `rental_create` vs `create` - ensure consistent URL pattern naming
 3. **Form Field Styling**: All form fields must have white backgrounds for proper contrast
-4. **Mobile Signature**: Digital signatures need optimization for mobile devices
 
 ## Next Steps
 
-1. Complete payment processing integration
-2. Implement analytics and reporting features
-3. Enhance mobile experience for field operations
-4. Add customer-facing rental portal features
+1. Complete rental processing workflow
+2. Enhance equipment inventory management
+3. Implement payment processing
+4. Add reporting and analytics features

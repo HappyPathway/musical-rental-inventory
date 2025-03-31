@@ -1,0 +1,124 @@
+{% extends 'rentals/base_rentals.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Add Equipment Items - {{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="my-4">{{ title }}</h2>
+    
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <!-- Rental details -->
+            <div class="card bg-dark mb-4">
+                <div class="card-header bg-gradient-dark">
+                    <h5 class="mb-0">Rental Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Customer:</strong> {{ rental.customer }}</p>
+                    <p><strong>Start Date:</strong> {{ rental.start_date }}</p>
+                    <p><strong>End Date:</strong> {{ rental.end_date }}</p>
+                    <p><strong>Duration Type:</strong> {{ rental.get_duration_type_display }}</p>
+                    <p><strong>Current Total:</strong> ${{ rental.total_price }}</p>
+                    <p><strong>Deposit Total:</strong> ${{ rental.deposit_total }}</p>
+                </div>
+            </div>
+            
+            <!-- Add Equipment Form -->
+            <div class="card bg-dark">
+                <div class="card-header bg-gradient-dark">
+                    <h5 class="mb-0">Add Equipment</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        
+                        <div class="d-grid gap-2 mt-3">
+                            <button type="submit" name="add_another" class="btn btn-primary">Add & Add Another</button>
+                            <button type="submit" class="btn btn-success">Add & Finish</button>
+                            <a href="{% url 'rentals:rental_detail' rental.id %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <!-- Current rental items -->
+            <div class="card bg-dark">
+                <div class="card-header bg-gradient-dark">
+                    <h5 class="mb-0">Current Rental Items</h5>
+                </div>
+                <div class="card-body">
+                    {% if rental_items %}
+                        <div class="table-responsive">
+                            <table class="table table-dark table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Equipment</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in rental_items %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ item.equipment.name }}</strong><br>
+                                            <small class="text-muted">{{ item.equipment.brand }}</small>
+                                        </td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td>${{ item.price }}</td>
+                                        <td>
+                                            <form method="post" action="{% url 'rentals:remove_rental_item' rental.pk item.pk %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="2" class="text-end">Total:</th>
+                                        <th>${{ rental.total_price }}</th>
+                                        <th></th>
+                                    </tr>
+                                    <tr>
+                                        <th colspan="2" class="text-end">Deposit:</th>
+                                        <th>${{ rental.deposit_total }}</th>
+                                        <th></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            No items added to this rental yet. Use the form to add equipment.
+                        </div>
+                    {% endif %}
+                    
+                    <div class="d-grid gap-2 mt-3">
+                        <a href="{% url 'rentals:rental_detail' rental.id %}" class="btn btn-success">Finish & View Rental</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize select2 for equipment dropdown
+    $(document).ready(function() {
+        $('.select2').select2({
+            theme: "dark",
+            placeholder: "Select equipment",
+            allowClear: true
+        });
+    });
+</script>
+{% endblock %}

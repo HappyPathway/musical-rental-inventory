@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}PayPal Payment - ROKNSOUND{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5">PayPal Payment for Rental #{{ rental.id }}</h1>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'rentals:rental_detail' rental.id %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Rental
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div class="row">
+        <div class="col-12">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Complete Your PayPal Payment</h5>
+                </div>
+                <div class="card-body text-center">
+                    <p>Total Amount Due: <strong>${{ rental.balance_due }}</strong></p>
+                    
+                    <!-- PayPal Payment Integration Placeholder -->
+                    <div id="paypal-button-container" class="my-4"></div>
+                    
+                    <p class="mt-3 text-muted">You will be redirected to PayPal to complete your payment.</p>
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        <a href="{% url 'payments:create' rental.id %}" class="btn btn-secondary">
+                            <i class="fas fa-chevron-left"></i> Choose Another Payment Method
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- PayPal SDK placeholder - this would be replaced with actual SDK in production -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Simulate PayPal button loading
+        setTimeout(function() {
+            const container = document.getElementById('paypal-button-container');
+            container.innerHTML = `
+                <button class="btn btn-primary btn-lg" style="background-color: #0070ba; width: 100%;">
+                    <i class="fab fa-paypal me-2"></i> Pay with PayPal
+                </button>
+            `;
+            
+            // Add click event for demo purposes
+            container.querySelector('button').addEventListener('click', function() {
+                window.location.href = "{% url 'payments:success' %}";
+            });
+        }, 1000);
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,38 @@
+[
+    {
+        "name": "Epiphone SG Standard",
+        "description": "Affordable SG-style guitar with dual humbuckers and mahogany body",
+        "brand": "Epiphone",
+        "model": "EGSGSTD",
+        "serial": "SG123456",
+        "purchase_date": "2025-03-15",
+        "purchase_price": 429.99,
+        "category": "Electric Guitars",
+        "condition": "New condition",
+        "notes": "Includes gig bag and setup"
+    },
+    {
+        "name": "Focusrite Scarlett 2i2 3rd Gen",
+        "description": "Popular 2-in/2-out USB audio interface with preamps",
+        "brand": "Focusrite",
+        "model": "Scarlett 2i2 3G",
+        "serial": "S2I2-9876543",
+        "purchase_date": "2025-02-01",
+        "purchase_price": 169.99,
+        "category": "Audio Interfaces",
+        "condition": "Like new",
+        "notes": "Includes USB cable and software bundle"
+    },
+    {
+        "name": "Sennheiser HD-25",
+        "description": "Professional DJ and monitoring headphones",
+        "brand": "Sennheiser",
+        "model": "HD-25",
+        "serial": "HD25-123456",
+        "purchase_date": "2025-01-10",
+        "purchase_price": 149.95,
+        "category": "Headphones",
+        "condition": "Excellent",
+        "notes": "Includes spare ear pads"
+    }
+]

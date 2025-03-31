@@ -13,7 +13,7 @@ from rentals.models import Rental
 @login_required
 def payment_list(request):
     """View to display a list of all payments."""
-    payments = Payment.objects.all().order_by('-date')
+    payments = Payment.objects.all().order_by('-payment_date')
     context = {'payments': payments}
     return render(request, 'payments/payment_list.html', context)
 

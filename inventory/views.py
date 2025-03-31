@@ -144,7 +144,7 @@ def equipment_delete(request, pk):
         equipment_name = equipment.name
         equipment.delete()
         messages.success(request, f'Equipment "{equipment_name}" has been deleted.')
-        return redirect('inventory:list')
+        return redirect('inventory:equipment_list')
     
     context = {
         'equipment': equipment,

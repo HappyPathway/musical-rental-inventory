@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Stripe Payment - ROKNSOUND{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5">Stripe Payment for Rental #{{ rental.id }}</h1>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'rentals:rental_detail' rental.id %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Rental
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div class="row">
+        <div class="col-12">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Pay with Credit Card</h5>
+                </div>
+                <div class="card-body">
+                    <form id="payment-form">
+                        <div class="mb-3">
+                            <label for="cardholder-name" class="form-label">Cardholder Name</label>
+                            <input type="text" class="form-control" id="cardholder-name" placeholder="Name on card" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="card-element" class="form-label">Credit or Debit Card</label>
+                            <div id="card-element" class="form-control" style="height: 40px; padding-top: 10px;">
+                                <!-- Stripe Elements will create input elements here -->
+                            </div>
+                            <div id="card-errors" role="alert" class="text-danger mt-2"></div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="rental-id" class="form-label">Rental ID</label>
+                                <input type="text" class="form-control" id="rental-id" value="#{{ rental.id }}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="amount" class="form-label">Amount Due</label>
+                                <input type="text" class="form-control" id="amount" value="${{ rental.balance_due }}" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary" id="submit-button">
+                                <i class="fas fa-lock me-2"></i> Pay Now
+                            </button>
+                            <a href="{% url 'payments:create' rental.id %}" class="btn btn-secondary">
+                                <i class="fas fa-chevron-left"></i> Choose Another Payment Method
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // For demonstration purposes only
+        const form = document.getElementById('payment-form');
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            // Simulate a successful payment and redirect
+            window.location.href = "{% url 'payments:success' %}";
+        });
+        
+        // Normally you would set up Stripe like this:
+        /*
+        const stripe = Stripe('pk_test_your_stripe_key');
+        const elements = stripe.elements();
+        const cardElement = elements.create('card');
+        cardElement.mount('#card-element');
+        
+        const form = document.getElementById('payment-form');
+        const cardButton = document.getElementById('submit-button');
+        const cardErrors = document.getElementById('card-errors');
+        
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            
+            cardButton.disabled = true;
+            cardButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Processing...';
+            
+            const { paymentMethod, error } = await stripe.createPaymentMethod({
+                type: 'card',
+                card: cardElement,
+                billing_details: {
+                    name: document.getElementById('cardholder-name').value,
+                },
+            });
+            
+            if (error) {
+                cardErrors.textContent = error.message;
+                cardButton.disabled = false;
+                cardButton.innerHTML = '<i class="fas fa-lock me-2"></i> Pay Now';
+            } else {
+                // Send to your server to handle the payment
+                fetch('{% url "payments:stripe_process" rental.id %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        payment_method_id: paymentMethod.id,
+                        rental_id: {{ rental.id }},
+                        amount: {{ rental.balance_due }}
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = data.redirect_url;
+                    } else {
+                        cardErrors.textContent = data.error;
+                        cardButton.disabled = false;
+                        cardButton.innerHTML = '<i class="fas fa-lock me-2"></i> Pay Now';
+                    }
+                });
+            }
+        });
+        */
+    });
+</script>
+{% endblock %}

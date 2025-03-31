@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Venmo Payment - ROKNSOUND{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5">Venmo Payment for Rental #{{ rental.id }}</h1>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'rentals:rental_detail' rental.id %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Rental
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div class="row">
+        <div class="col-12">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Pay with Venmo</h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="my-4">
+                        <img src="{% static 'images/venmo-qr-placeholder.png' %}" alt="Venmo QR Code" class="img-fluid mb-3" style="max-width: 250px; border: 1px solid #ddd; padding: 10px;">
+                        <p class="mb-0">Venmo @ROKNSOUND</p>
+                    </div>
+                    
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle me-2"></i> Please include your <strong>Rental ID #{{ rental.id }}</strong> in the payment memo.
+                    </div>
+                    
+                    <p class="mt-3 mb-2">Total Amount Due: <strong>${{ rental.balance_due }}</strong></p>
+                    
+                    <form id="venmo-form" method="post" class="mt-4">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="venmo_username" class="form-label">Your Venmo Username</label>
+                            <input type="text" class="form-control" id="venmo_username" name="venmo_username" placeholder="@your-username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmation_code" class="form-label">Venmo Transaction ID</label>
+                            <input type="text" class="form-control" id="confirmation_code" name="confirmation_code" placeholder="Enter after payment" required>
+                            <div class="form-text">Find this in your Venmo transaction history after making the payment</div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 mt-4">
+                            <a href="https://venmo.com/" class="btn btn-primary" target="_blank">
+                                <i class="fab fa-vimeo-v me-2"></i> Open Venmo App
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-check me-2"></i> Confirm Payment
+                            </button>
+                            <a href="{% url 'payments:create' rental.id %}" class="btn btn-secondary">
+                                <i class="fas fa-chevron-left"></i> Choose Another Payment Method
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('venmo-form');
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            // For demonstration purposes, redirect to the success page
+            window.location.href = "{% url 'payments:success' %}";
+        });
+    });
+</script>
+{% endblock %}
