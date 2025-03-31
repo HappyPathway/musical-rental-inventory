@@ -1,0 +1,53 @@
+name: "Terraform Apply Infra"
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'infra/**'
+
+permissions:
+  id-token: write # Required for AWS OIDC
+  contents: read
+
+jobs:
+  terraform:
+    name: "Apply Infra"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }} # Use org secret for AWS Role ARN
+          aws-region: us-east-1 # Or your desired region
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.1 # Or your desired version
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -out=tfplan
+        # Add -var-file if needed
+
+      - name: Terraform Apply
+        id: apply
+        run: terraform apply -auto-approve tfplan
