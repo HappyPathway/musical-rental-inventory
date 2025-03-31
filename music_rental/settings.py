@@ -191,35 +191,65 @@ STATICFILES_DIRS.append(
 
 ADMIN_MEDIA_PREFIX = '/static/'
 
-# AWS S3 Storage Configuration
-USE_S3 = os.environ.get('USE_S3', 'FALSE').upper() == 'TRUE'
-AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+# --- Storage Configuration ---
 
-# Only use S3 if proper credentials are configured
-if USE_S3 and AWS_ACCESS_KEY_ID:
-    # AWS Settings
-    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
-    AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
-    AWS_DEFAULT_ACL = 'public-read'
-    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-    AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
+# Check if GCS should be used (e.g., in production)
+USE_GCS = os.environ.get('USE_GCS', 'FALSE').upper() == 'TRUE'
+GOOGLE_CLOUD_PROJECT_ID = os.environ.get('GOOGLE_CLOUD_PROJECT_ID') # Needed for GCS
+
+if USE_GCS and GOOGLE_CLOUD_PROJECT_ID:
+    # Google Cloud Storage settings
+    GS_BUCKET_NAME = 'roknsound-music-rental-inventory'
+    GS_DEFAULT_ACL = 'publicRead' # Or 'private' depending on your needs
+    GS_OBJECT_PARAMETERS = {
+        'cache_control': 'max-age=86400',
+    }
+    GS_LOCATION = 'media' # Optional: subdirectory within the bucket
     
-    # S3 Static settings
-    STATIC_LOCATION = 'static'
-    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{STATIC_LOCATION}/'
+    # Set default file storage to GCS
+    DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
     
-    # S3 Media settings
-    MEDIA_LOCATION = 'media'
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/'
-    DEFAULT_FILE_STORAGE = 'music_rental.storage_backends.MediaStorage'
+    # Static files can also be served from GCS if desired
+    # STATICFILES_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+    # GS_STATIC_LOCATION = 'static'
+    # STATIC_URL = f'https://storage.googleapis.com/{GS_BUCKET_NAME}/{GS_STATIC_LOCATION}/'
+
+    # Media files URL (adjust if using a custom domain)
+    MEDIA_URL = f'https://storage.googleapis.com/{GS_BUCKET_NAME}/{GS_LOCATION}/'
     
-    # Site domain for absolute URLs
-    SITE_DOMAIN = AWS_S3_CUSTOM_DOMAIN
+    # Site domain for absolute URLs (if needed)
+    # SITE_DOMAIN = f'storage.googleapis.com/{GS_BUCKET_NAME}'
+
 else:
-    # Use the default file system storage
-    SITE_DOMAIN = 'localhost:8000'
+    # Local file storage settings (development)
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    STATIC_URL = "static/"
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    STATICFILES_DIRS = [
+        os.path.join(BASE_DIR, 'static')
+    ]
+    # SITE_DOMAIN = 'localhost:8000' # Keep local domain if needed
 
-# Configure the site framework with our domain
+# Remove or comment out the old AWS S3 specific logic
+# USE_S3 = os.environ.get('USE_S3', 'FALSE').upper() == 'TRUE'
+# AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+# if USE_S3 and AWS_ACCESS_KEY_ID:
+#     AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+#     AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+#     AWS_DEFAULT_ACL = 'public-read'
+#     AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+#     AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
+#     STATIC_LOCATION = 'static'
+#     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{STATIC_LOCATION}/'
+#     MEDIA_LOCATION = 'media'
+#     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/'
+#     DEFAULT_FILE_STORAGE = 'music_rental.storage_backends.MediaStorage'
+#     SITE_DOMAIN = AWS_S3_CUSTOM_DOMAIN
+# else:
+#     SITE_DOMAIN = 'localhost:8000'
+
+# Configure the site framework (if using django.contrib.sites)
 SITE_ID = 1
 
 # OpenAI API settings
