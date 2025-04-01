@@ -30,11 +30,38 @@ resource "google_storage_bucket" "media_bucket" {
   # }
 }
 
-# Add outputs if needed, e.g., the bucket name or URL
-output "media_bucket_name" {
-  value = google_storage_bucket.media_bucket.name
+# Grant public read access to the media bucket
+resource "google_storage_bucket_iam_binding" "media_bucket_public_read" {
+  bucket = google_storage_bucket.media_bucket.name
+  role   = "roles/storage.objectViewer"
+  members = [
+    "allUsers",
+  ]
 }
 
-output "media_bucket_url" {
-  value = google_storage_bucket.media_bucket.url
+
+# Create a service account for the application
+resource "google_service_account" "app_service_account" {
+  account_id   = "roknsound-storage-sa"
+  display_name = "ROKNSOUND Storage Service Account"
+  project      = "happypathway-1522441039906" # Replace with your project ID
+}
+
+# Grant the service account permissions on the bucket
+resource "google_storage_bucket_iam_member" "app_sa_bucket_admin" {
+  bucket = google_storage_bucket.media_bucket.name
+  role   = "roles/storage.objectAdmin" # Permissions to manage objects
+  member = "serviceAccount:${google_service_account.app_service_account.email}"
+}
+
+# Create a key for the service account
+resource "google_service_account_key" "app_service_account_key" {
+  service_account_id = google_service_account.app_service_account.name
+  public_key_type    = "TYPE_X509_PEM_FILE" # Or other types if needed
+}
+
+# Save the service account key to a local file
+resource "local_file" "service_account_key_file" {
+  content  = base64decode(google_service_account_key.app_service_account_key.private_key)
+  filename = "${path.module}/../gcp-service-account-key.json" # Save in the infra directory
 }

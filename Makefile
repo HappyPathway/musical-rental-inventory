@@ -1,4 +1,4 @@
-.PHONY: venv install migrate run shell test clean superuser static collectstatic lint help kill reset test-selenium test-selenium-inventory test-selenium-rentals test-selenium-users test-selenium-payments
+.PHONY: venv install migrate run shell test clean superuser static collectstatic lint help kill reset test-selenium test-selenium-inventory test-selenium-rentals test-selenium-users test-selenium-payments infra
 
 PYTHON = python3
 PIP = pip3
@@ -126,3 +126,13 @@ test-selenium-payments:
 # Visual browser tests (non-headless)
 test-selenium-visual:
 	$(VENV_ACTIVATE) && ./run_selenium_tests.py
+
+# Terraform Infrastructure Target
+infra:
+	@echo "Applying Terraform infrastructure changes..."
+	cd infra && \
+	terraform init && \
+	terraform validate && \
+	terraform plan && \
+	terraform apply -auto-approve
+	@echo "Terraform apply complete."
