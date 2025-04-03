@@ -1,4 +1,4 @@
-.PHONY: venv install migrate run shell test clean superuser static collectstatic lint help kill reset test-selenium test-selenium-inventory test-selenium-rentals test-selenium-users test-selenium-payments infra import-fixtures docker-build docker-run docker-push gcp-auth deploy-cloud-run taint-sa-key fetch-pa-speakers load-pa-fixtures setup-pa-inventory test test-unit test-integration test-e2e test-e2e-visual test-e2e-inventory test-e2e-rentals test-e2e-users test-e2e-payments infra-apply
+.PHONY: venv install migrate run shell test clean superuser static collectstatic lint help kill reset test-selenium test-selenium-inventory test-selenium-rentals test-selenium-users test-selenium-payments infra import-fixtures docker-build docker-run docker-push gcp-auth deploy-cloud-run taint-sa-key fetch-pa-speakers load-pa-fixtures setup-pa-inventory test test-unit test-integration test-e2e test-e2e-visual test-e2e-inventory test-e2e-rentals test-e2e-users test-e2e-payments infra-apply fix-cloudbuild-sa-permissions test-cloudbuild tf-deploy
 
 # Include environment variables if .env exists
 -include .env
@@ -344,17 +344,6 @@ taint-sa-key:
 	cd infra && terraform init && terraform taint google_service_account_key.app_service_account_key
 	@echo "Service account key tainted. Run 'make infra' to apply changes and generate a new key."
 
-fetch-pa-speakers:
-	@echo "Fetching PA speaker data from Sweetwater..."
-	@python scripts/fetch_pa_speakers.py
-
-load-pa-fixtures:
-	@echo "Loading PA speaker fixtures..."
-	@python manage.py loaddata inventory/fixtures/pa_speakers.json
-
-setup-pa-inventory: fetch-pa-speakers load-pa-fixtures
-	@echo "PA speaker inventory setup complete!"
-
 # Test targets
 .PHONY: test test-unit test-integration test-e2e test-all
 
@@ -392,27 +381,3 @@ test-e2e-payments:
 
 test-all: test-unit test-integration test-e2e
 	@echo "All tests complete (including E2E tests)"
-
-# Consolidated Cloud Build target with proper permissions
-cloud-build:
-	@echo "Setting up permissions and triggering Cloud Build..."
-	source venv/bin/activate && gcloud config set project $(GCP_PROJECT_ID)
-	source venv/bin/activate && gcloud services enable cloudbuild.googleapis.com
-	source venv/bin/activate && gcloud projects add-iam-policy-binding $(GCP_PROJECT_ID) \
-		--member=user:dave@roknsound.com \
-		--role=roles/cloudbuild.builds.editor
-	source venv/bin/activate && gcloud projects add-iam-policy-binding $(GCP_PROJECT_ID) \
-		--member=serviceAccount:$(shell source venv/bin/activate && gcloud projects describe $(GCP_PROJECT_ID) --format="value(projectNumber)")@cloudbuild.gserviceaccount.com \
-		--role=roles/cloudbuild.builds.builder
-	source venv/bin/activate && gcloud projects add-iam-policy-binding $(GCP_PROJECT_ID) \
-		--member=serviceAccount:$(shell source venv/bin/activate && gcloud projects describe $(GCP_PROJECT_ID) --format="value(projectNumber)")@cloudbuild.gserviceaccount.com \
-		--role=roles/run.admin
-	source venv/bin/activate && gcloud projects add-iam-policy-binding $(GCP_PROJECT_ID) \
-		--member=serviceAccount:$(shell source venv/bin/activate && gcloud projects describe $(GCP_PROJECT_ID) --format="value(projectNumber)")@cloudbuild.gserviceaccount.com \
-		--role=roles/iam.serviceAccountUser
-	source venv/bin/activate && gcloud projects add-iam-policy-binding $(GCP_PROJECT_ID) \
-		--member=serviceAccount:$(shell source venv/bin/activate && gcloud projects describe $(GCP_PROJECT_ID) --format="value(projectNumber)")@cloudbuild.gserviceaccount.com \
-		--role=roles/artifactregistry.admin
-	source venv/bin/activate && cd $(PWD) && gcloud builds submit --config=cloudbuild.yaml
-	@echo "Cloud Build triggered. Check the GCP console for build progress."
-

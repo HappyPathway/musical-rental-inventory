@@ -8,6 +8,7 @@ resource "google_cloud_run_service" "app" {
   template {
     spec {
       containers {
+        #
         image = "gcr.io/${var.project_id}/roknsound-app:latest"  # You'll need to build and push this image
         
         env {

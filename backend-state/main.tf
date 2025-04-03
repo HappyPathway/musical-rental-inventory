@@ -43,3 +43,37 @@ terraform {
 }
 EOT
 }
+
+# GitHub repository connection for Cloud Build
+resource "google_cloudbuildv2_repository" "github_repo" {
+  name              = "musical-rental-inventory"
+  parent_connection = google_cloudbuildv2_connection.github_connection.name
+  remote_uri        = "https://github.com/HappyPathway/musical-rental-inventory.git"
+  location          = var.location
+}
+
+# GitHub connection for Cloud Build
+resource "google_cloudbuildv2_connection" "github_connection" {
+  name     = "github-connection"
+  location = var.location
+  
+  github_config {
+    app_installation_id = data.google_secret_manager_secret_version.github_app_installation_id.secret_data
+    authorizer_credential {
+      oauth_token_secret_version = data.google_secret_manager_secret_version.github_oauth_token.id
+    }
+  }
+}
+
+# Data sources for GitHub secrets
+data "google_secret_manager_secret_version" "github_app_installation_id" {
+  secret  = "github-app-installation-id"
+  version = "latest"
+  project = var.project_id
+}
+
+data "google_secret_manager_secret_version" "github_oauth_token" {
+  secret  = "github-oauth-token"
+  version = "latest"
+  project = var.project_id
+}
