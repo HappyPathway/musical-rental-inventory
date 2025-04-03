@@ -22,7 +22,8 @@ jobs:
         
     - name: 'Set up Cloud SDK'
       uses: 'google-github-actions/setup-gcloud@v2'
-      project_id: happypathway-1522441039906
+      with:
+        project_id: happypathway-1522441039906
     
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
