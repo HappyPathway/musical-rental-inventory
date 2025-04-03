@@ -23,6 +23,11 @@ jobs:
     - name: 'Set up Cloud SDK'
       uses: 'google-github-actions/setup-gcloud@v1'
     
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.9.1
+        
     - name: Get Terraform Output
       id: tf-output
       working-directory: ./backend-state
