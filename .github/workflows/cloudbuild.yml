@@ -22,7 +22,13 @@ jobs:
         
     - name: 'Set up Cloud SDK'
       uses: 'google-github-actions/setup-gcloud@v1'
-    
+
+    - name: Fix GCloud Config
+      run: |
+        gcloud auth activate-service-account --key-file=${{steps.auth.outputs.credentials_file_path}}
+        gcloud config set account terraformer@${{ vars.GOOGLE_PROJECT }}.iam.gserviceaccount.com
+        gcloud config set project ${{ vars.GOOGLE_PROJECT }}
+
     - name: Trigger Cloud Build
       run: |
         gcloud builds submit --config=cloudbuild.yaml
