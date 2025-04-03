@@ -23,6 +23,15 @@ jobs:
     - name: 'Set up Cloud SDK'
       uses: 'google-github-actions/setup-gcloud@v1'
     
+    - name: Get Terraform Output
+      id: tf-output
+      working-directory: ./backend-state
+      run: |
+        terraform init
+        echo "bucket_name=$(terraform output -raw bucket_name)" >> $GITHUB_OUTPUT
+
     - name: Trigger Cloud Build
       run: |
-        gcloud builds submit --config=cloudbuild.yaml
+        gcloud builds submit --config=cloudbuild.yaml \
+        --gcs-source-staging-dir=gs://${{ steps.tf-output.outputs.bucket_name }}/tmp \
+        --config=cloudbuild.yaml

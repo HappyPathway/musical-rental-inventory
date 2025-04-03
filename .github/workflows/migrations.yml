@@ -26,7 +26,21 @@ jobs:
     - name: 'Set up Cloud SDK'
       uses: 'google-github-actions/setup-gcloud@v1'
 
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.9.1
+
+    - name: Get Terraform Output
+      id: tf-output
+      working-directory: ./backend-state
+      run: |
+        terraform init
+        echo "bucket_name=$(terraform output -raw bucket_name)" >> $GITHUB_OUTPUT
+
     # Simply trigger Cloud Build without custom substitutions for now
     - name: Run migrations-only build
       run: |
-        gcloud builds submit --config=cloudbuild.yaml
+        gcloud builds submit \
+        --gcs-source-staging-dir=gs://${{ steps.tf-output.outputs.bucket_name }}/tmp \
+        --config=cloudbuild.yaml

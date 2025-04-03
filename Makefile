@@ -450,3 +450,143 @@ run-cloudbuild:
 		PROJ_NUM=$$(gcloud projects describe $(GCP_PROJECT_ID) --format="value(projectNumber)") && \
 		gcloud builds submit --config=cloudbuild.yaml --impersonate-service-account=$$PROJ_NUM@cloudbuild.gserviceaccount.com
 	@echo "Cloud Build submitted."
+
+# GitHub Actions setup 
+setup-github-actions: 
+	@echo "Setting up GitHub Actions for Terraform and Cloud Build..."
+	@mkdir -p .github/workflows
+	@cat > .github/workflows/terraform.yml << EOF
+name: Terraform Infrastructure
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'infra/**'
+      - 'backend-state/**'
+      - '.github/workflows/terraform.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'infra/**'
+      - 'backend-state/**'
+  workflow_dispatch:
+
+jobs:
+  backend-state:
+    runs-on: ubuntu-latest
+    outputs:
+      bucket_name: \${{ steps.tf_output.outputs.bucket_name }}
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: "~1.5.0"
+          
+      - name: Google Auth
+        id: auth
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: \${{ secrets.GOOGLE_CREDENTIALS }}
+      
+      - name: Setup terraform backend state
+        run: |
+          cd backend-state
+          terraform init
+          terraform apply -auto-approve
+      
+      - name: Get Backend State outputs
+        id: tf_output
+        run: |
+          cd backend-state
+          echo "bucket_name=\$(terraform output -raw state_bucket_name)" >> \$GITHUB_OUTPUT
+
+  terraform:
+    needs: backend-state
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: "~1.5.0"
+      
+      - name: Google Auth
+        id: auth
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: \${{ secrets.GOOGLE_CREDENTIALS }}
+      
+      - name: Terraform Init
+        run: |
+          cd infra
+          terraform init -backend-config="bucket=\${{ needs.backend-state.outputs.bucket_name }}"
+      
+      - name: Terraform Plan
+        id: plan
+        run: |
+          cd infra
+          terraform plan -no-color
+      
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        run: |
+          cd infra
+          terraform apply -auto-approve
+      
+  deploy:
+    needs: [backend-state, terraform]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Google Auth
+        id: auth
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: \${{ secrets.GOOGLE_CREDENTIALS }}
+      
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+      
+      - name: Trigger Cloud Build
+        run: |
+          gcloud builds submit --config=cloudbuild.yaml \
+            --substitutions=_GS_BUCKET_NAME=\${{ needs.backend-state.outputs.bucket_name }}
+EOF
+	@echo "GitHub Actions workflow file created at .github/workflows/terraform.yml"
+	@echo ""
+	@echo "Next steps:"
+	@echo "1. Add GOOGLE_CREDENTIALS secret to your GitHub repository"
+	@echo "   - Generate a service account key with appropriate permissions"
+	@echo "   - Base64 encode the JSON key file"
+	@echo "   - Add it as a repository secret named GOOGLE_CREDENTIALS"
+	@echo ""
+	@echo "2. Update backend-state/outputs.tf to include correct output variables:"
+	@echo "   output \"state_bucket_name\" {"
+	@echo "     value = google_storage_bucket.terraform_state.name"
+	@echo "   }"
+
+# Fix backend-state outputs for GitHub Actions
+fix-backend-outputs:
+	@echo "Updating backend-state outputs for GitHub Actions..."
+	@cat > backend-state/outputs.tf << EOF
+output "state_bucket_name" {
+  value = google_storage_bucket.terraform_state.name
+}
+
+output "location" {
+  value = var.location
+}
+EOF
+	@echo "Backend state outputs updated for GitHub Actions."

@@ -1,6 +1,6 @@
 terraform {
   backend "gcs" {
-    bucket = "roknsound-tfstate"
-    prefix = "terraform/state"
+    bucket  = "roknsound-tfstate"
+    prefix  = "terraform/infra"
   }
 }
