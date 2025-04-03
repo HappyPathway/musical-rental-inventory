@@ -29,8 +29,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project
 COPY . .
 
-# Copy service account key
-COPY gcp-service-account-key.json /app/gcp-service-account-key.json
+# # Copy service account key
+# COPY gcp-service-account-key.json /app/gcp-service-account-key.json
 
 # Collect static files
 RUN python manage.py collectstatic --noinput
