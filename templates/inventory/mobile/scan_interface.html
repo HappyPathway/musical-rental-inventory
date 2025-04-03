@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Scan Equipment{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2 mobile-scan-interface">
+    <div class="row mb-3">
+        <div class="col-12">
+            <h1>Scan QR Code</h1>
+        </div>
+    </div>
+    
+    <div class="card bg-dark mb-4">
+        <div class="card-body p-2">
+            <!-- Camera View -->
+            <div id="camera-container" class="position-relative mb-3">
+                <video id="scanner-preview" class="w-100 rounded"></video>
+                <button id="flashlight-toggle" class="btn btn-sm btn-secondary position-absolute top-0 end-0 m-2">
+                    <i class="fas fa-bolt"></i>
+                </button>
+            </div>
+            
+            <!-- Scan Controls -->
+            <div class="d-grid gap-2">
+                <button id="start-scan" class="btn btn-primary">
+                    <i class="fas fa-camera me-2"></i> Start Scanner
+                </button>
+                <button id="stop-scan" class="btn btn-outline-secondary d-none">
+                    <i class="fas fa-stop-circle me-2"></i> Stop Scanner
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Manual Entry -->
+    <div class="card bg-dark mb-3">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Manual Entry</h5>
+        </div>
+        <div class="card-body">
+            <form id="manual-search-form" action="{% url 'inventory:equipment_scan_result' %}" method="get">
+                <div class="input-group mb-2">
+                    <input type="text" id="manual-entry" name="id" class="form-control" placeholder="Enter equipment ID or serial number">
+                    <button id="manual-search" class="btn btn-primary" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Recent Scans -->
+    <div class="card bg-dark">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Recent Scans</h5>
+            <button id="clear-history" class="btn btn-sm btn-outline-secondary">Clear</button>
+        </div>
+        <div class="card-body">
+            <div id="scan-history" class="list-group list-group-flush bg-dark">
+                <!-- Will be populated by JavaScript -->
+                <div class="text-center text-muted py-3">No recent scans</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://unpkg.com/@zxing/library@latest"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const cameraContainer = document.getElementById('camera-container');
+        const scannerPreview = document.getElementById('scanner-preview');
+        const startScanBtn = document.getElementById('start-scan');
+        const stopScanBtn = document.getElementById('stop-scan');
+        const flashlightToggle = document.getElementById('flashlight-toggle');
+        const scanHistory = document.getElementById('scan-history');
+        const clearHistoryBtn = document.getElementById('clear-history');
+        
+        let codeReader;
+        let selectedDeviceId;
+        let track;
+        let scanHistoryItems = JSON.parse(localStorage.getItem('scanHistory') || '[]');
+        
+        // Update scan history display
+        function updateScanHistory() {
+            if (scanHistoryItems.length === 0) {
+                scanHistory.innerHTML = '<div class="text-center text-muted py-3">No recent scans</div>';
+                return;
+            }
+            
+            scanHistory.innerHTML = '';
+            scanHistoryItems.slice(0, 5).forEach(item => {
+                let historyItem = document.createElement('a');
+                historyItem.href = item.url;
+                historyItem.className = 'list-group-item list-group-item-action bg-dark border-secondary';
+                historyItem.innerHTML = `
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">${item.name}</h6>
+                        <small>${new Date(item.timestamp).toLocaleTimeString()}</small>
+                    </div>
+                    <small class="text-muted">${item.serial || 'No serial number'}</small>
+                `;
+                scanHistory.appendChild(historyItem);
+            });
+        }
+        
+        // Initialize scan history
+        updateScanHistory();
+        
+        // Clear history button
+        clearHistoryBtn.addEventListener('click', function() {
+            scanHistoryItems = [];
+            localStorage.setItem('scanHistory', JSON.stringify(scanHistoryItems));
+            updateScanHistory();
+        });
+        
+        // Start scanning button
+        startScanBtn.addEventListener('click', function() {
+            startScanBtn.classList.add('d-none');
+            stopScanBtn.classList.remove('d-none');
+            
+            codeReader = new ZXing.BrowserMultiFormatReader();
+            
+            codeReader.listVideoInputDevices()
+                .then(videoInputDevices => {
+                    // Prefer rear camera if available
+                    selectedDeviceId = videoInputDevices.find(device => 
+                        device.label.toLowerCase().includes('back') || 
+                        device.label.toLowerCase().includes('rear')
+                    )?.deviceId || videoInputDevices[0]?.deviceId;
+                    
+                    if (selectedDeviceId) {
+                        codeReader.decodeFromVideoDevice(
+                            selectedDeviceId, 
+                            'scanner-preview',
+                            (result, err) => {
+                                if (result) {
+                                    // Get the scanned URL
+                                    let scannedUrl = result.getText();
+                                    
+                                    // Try to extract equipment ID from URL
+                                    try {
+                                        let url = new URL(scannedUrl);
+                                        let pathParts = url.pathname.split('/');
+                                        let equipmentId = pathParts.find(part => /^\d+$/.test(part));
+                                        
+                                        if (equipmentId) {
+                                            // Add to scan history
+                                            scanHistoryItems.unshift({
+                                                name: `Equipment #${equipmentId}`,
+                                                url: `/inventory/${equipmentId}/`,
+                                                timestamp: Date.now(),
+                                                serial: result.getText()
+                                            });
+                                            
+                                            // Keep only the latest 10 scans
+                                            scanHistoryItems = scanHistoryItems.slice(0, 10);
+                                            localStorage.setItem('scanHistory', JSON.stringify(scanHistoryItems));
+                                            
+                                            // Redirect to equipment details
+                                            window.location.href = `/inventory/${equipmentId}/`;
+                                        } else {
+                                            alert('Could not find equipment ID in QR code.');
+                                        }
+                                    } catch (e) {
+                                        alert('Invalid QR code: ' + scannedUrl);
+                                    }
+                                }
+                                
+                                if (err && !(err instanceof ZXing.NotFoundException)) {
+                                    console.error(err);
+                                }
+                            }
+                        )
+                        .then(() => {
+                            // Get video track to control flashlight
+                            const stream = scannerPreview.srcObject;
+                            if (stream) {
+                                track = stream.getVideoTracks()[0];
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            alert('Error accessing camera: ' + err);
+                            stopScanner();
+                        });
+                    } else {
+                        alert('No camera found on your device');
+                        stopScanner();
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Error accessing camera: ' + err);
+                    stopScanner();
+                });
+        });
+        
+        // Stop scanning button
+        stopScanBtn.addEventListener('click', stopScanner);
+        
+        function stopScanner() {
+            if (codeReader) {
+                codeReader.reset();
+                startScanBtn.classList.remove('d-none');
+                stopScanBtn.classList.add('d-none');
+            }
+        }
+        
+        // Flashlight toggle
+        flashlightToggle.addEventListener('click', function() {
+            if (track && 'torch' in track.getCapabilities()) {
+                const torchOn = track.getConstraints().advanced?.[0]?.torch || false;
+                track.applyConstraints({
+                    advanced: [{ torch: !torchOn }]
+                }).then(() => {
+                    flashlightToggle.classList.toggle('btn-warning');
+                    flashlightToggle.classList.toggle('btn-secondary');
+                }).catch(err => {
+                    console.error('Could not toggle flashlight:', err);
+                });
+            } else {
+                alert('Flashlight not available on this device');
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

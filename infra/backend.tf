@@ -1,6 +1,6 @@
 terraform {
   backend "gcs" {
-    bucket = "hpw-terraform-state"
-    prefix = "music-rental-inventory"
+    bucket = "roknsound-tfstate"
+    prefix = "terraform/state"
   }
 }

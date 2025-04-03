@@ -68,7 +68,7 @@
                     {% for rental in rentals %}
                     <tr>
                         <td><a href="{% url 'rentals:rental_detail' rental.id %}">{{ rental.id }}</a></td>
-                        <td>{{ rental.customer.name }}</td>
+                        <td>{{ rental.customer.first_name }} {{ rental.customer.last_name }}</td>
                         <td>{{ rental.start_date|date:"M d, Y" }}</td>
                         <td>{{ rental.end_date|date:"M d, Y" }}</td>
                         <td>

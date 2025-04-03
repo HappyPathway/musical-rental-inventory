@@ -10,11 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
-from pathlib import Path
 import os
+from pathlib import Path
+from django.core.management.utils import get_random_secret_key
+import json
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
+# Load environment variables (primarily for local development)
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -24,12 +26,28 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-25_3kvhx8$%7g*p9nbo8(iy*vmiow3f%%x_%!3d@^7gb1t_8jy"
+# Read directly from environment (set by Cloud Run/dotenv)
+SECRET_KEY = os.environ.get('SECRET_KEY', get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Read directly from environment
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1', '192.168.1.96']
+# Add Cloud Run host to allowed hosts
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '0.0.0.0', # Allow access via 0.0.0.0 when running in Docker locally
+    '.run.app',  # Allow all Cloud Run domains
+]
+# If running on Cloud Run, get the service URL
+CLOUDRUN_SERVICE_URL = os.environ.get('K_SERVICE')
+if CLOUDRUN_SERVICE_URL:
+    ALLOWED_HOSTS.append(f'{CLOUDRUN_SERVICE_URL}.run.app')
+
+# Get the current environment
+# Read directly from environment
+ENVIRONMENT = os.environ.get('ENVIRONMENT', 'development')
 
 
 # Application definition
@@ -50,6 +68,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "allauth",
     "allauth.account",
+    "allauth.socialaccount",
     "widget_tweaks",
     "simple_history",
     "storages",
@@ -63,6 +82,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # Add WhiteNoise middleware
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -97,12 +117,22 @@ WSGI_APPLICATION = "music_rental.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+# Read DATABASE_URL directly from environment (set by Cloud Run/dotenv)
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if DATABASE_URL:
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
     }
-}
+else:
+    # Fallback to SQLite for local development if DATABASE_URL is not set
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 
 # Password validation
@@ -145,92 +175,50 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
 
-# Media files
+# Media files configuration
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
+# Google Cloud Storage configuration - now the default
+GS_BUCKET_NAME = os.environ.get('GS_BUCKET_NAME', 'roknsound-music-rental-inventory')
+GS_PROJECT_ID = os.environ.get('GS_PROJECT_ID', '')
 
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+# Define storage locations
+STATIC_LOCATION = 'static'
+MEDIA_LOCATION = 'media'
 
-# Crispy Forms
-CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
-CRISPY_TEMPLATE_PACK = "bootstrap5"
-
-# Authentication settings
-AUTHENTICATION_BACKENDS = [
-    # Needed to login by username in Django admin
-    'django.contrib.auth.backends.ModelBackend',
-    # `allauth` specific authentication methods
-    'allauth.account.auth_backends.AuthenticationBackend',
-]
-
-# Payment settings 
-STRIPE_PUBLIC_KEY = ""
-STRIPE_SECRET_KEY = ""
-PAYPAL_CLIENT_ID = ""
-PAYPAL_SECRET_KEY = ""
-
-# Django AllAuth Settings
-LOGIN_REDIRECT_URL = 'users:dashboard'
-ACCOUNT_LOGOUT_REDIRECT_URL = 'home'
-ACCOUNT_SIGNUP_REDIRECT_URL = 'users:dashboard'
-ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_EMAIL_VERIFICATION = 'optional'  # Set to 'mandatory' in production
-ACCOUNT_USERNAME_REQUIRED = True
-ACCOUNT_SESSION_REMEMBER = True
-ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_SIGNUP_FORM_CLASS = 'users.forms.CustomerRegistrationForm'
-
-# Custom admin styles
-STATICFILES_DIRS.append(
-    os.path.join(BASE_DIR, 'static/css/')
-)
-
-ADMIN_MEDIA_PREFIX = '/static/'
-
-# --- Storage Configuration ---
-
-# Google Cloud Storage settings (Default)
-# GOOGLE_CLOUD_PROJECT_ID = os.environ.get('GOOGLE_CLOUD_PROJECT_ID') # Required for GCS
-GOOGLE_CLOUD_PROJECT_ID = 'happypathway-1522441039906' # Set directly from user input
-GS_BUCKET_NAME = 'roknsound-music-rental-inventory'
-GS_OBJECT_PARAMETERS = {
-    'cache_control': 'max-age=86400',
-}
-GS_LOCATION = 'media' # Optional: subdirectory within the bucket
-
-# Set default file storage to GCS
+# Configure Google Cloud Storage for media files
 DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 
-# Media files URL (points to GCS)
-MEDIA_URL = f'https://storage.googleapis.com/{GS_BUCKET_NAME}/{GS_LOCATION}/'
+# Update media URL to point to GCS
+MEDIA_URL = f'https://storage.googleapis.com/{GS_BUCKET_NAME}/{MEDIA_LOCATION}/'
 
-# Static files settings
-STATICFILES_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage' # Use GCS for static files too
-GS_STATIC_LOCATION = 'static' # Subdirectory for static files in GCS
-STATIC_URL = f'https://storage.googleapis.com/{GS_BUCKET_NAME}/{GS_STATIC_LOCATION}/' # URL for static files in GCS
+# Fall back to local storage for development if explicitly set
+USE_LOCAL_STORAGE = os.environ.get('USE_LOCAL_STORAGE', '') == '1'
+if USE_LOCAL_STORAGE:
+    # Use default Django file storage
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    MEDIA_URL = '/media/'
 
-# STATIC_ROOT is where collectstatic gathers files locally *before* uploading
-# It's still useful even when using remote storage
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_collected_temp') 
+# Crispy Forms settings
+CRISPY_TEMPLATE_PACK = 'bootstrap5'
+CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
 
-# Local static dirs (for development and finding files during collectstatic)
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static')
-]
-
-# Remove or comment out the old conditional logic and AWS S3 specific logic
-# USE_GCS = os.environ.get('USE_GCS', 'FALSE').upper() == 'TRUE'
-# if USE_GCS and GOOGLE_CLOUD_PROJECT_ID:
-#    ...
-# else:
-#    ...
-
-# Configure the site framework (if using django.contrib.sites)
+# Site ID for django.contrib.sites
 SITE_ID = 1
 
-# OpenAI API settings
-OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
+# OpenAI API Key
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
+
+# Authentication settings
+LOGIN_URL = 'account_login'
+LOGIN_REDIRECT_URL = 'users:dashboard'
+ACCOUNT_LOGOUT_REDIRECT_URL = 'home'
+
+# django-allauth settings
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
+ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
+ACCOUNT_USERNAME_MIN_LENGTH = 4
+ACCOUNT_LOGOUT_ON_GET = True  # Don't require POST for logout

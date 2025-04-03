@@ -1,0 +1,41 @@
+[
+  {
+    "model": "inventory.maintenancerecord",
+    "pk": 1,
+    "fields": {
+      "equipment": 1,
+      "date": "2023-01-15",
+      "description": "Regular tuning and string replacement",
+      "cost": "25.00",
+      "performed_by": "John Tech",
+      "scheduled_date": null,
+      "is_completed": true
+    }
+  },
+  {
+    "model": "inventory.maintenancerecord",
+    "pk": 2,
+    "fields": {
+      "equipment": 2,
+      "date": "2023-02-20",
+      "description": "Amp tube replacement",
+      "cost": "150.00",
+      "performed_by": "Electronics Shop",
+      "scheduled_date": null,
+      "is_completed": true
+    }
+  },
+  {
+    "model": "inventory.maintenancerecord",
+    "pk": 3,
+    "fields": {
+      "equipment": 3,
+      "date": "2023-03-10",
+      "description": "Drum head replacement",
+      "cost": "120.00",
+      "performed_by": "Drum Doctor",
+      "scheduled_date": null,
+      "is_completed": true
+    }
+  }
+]

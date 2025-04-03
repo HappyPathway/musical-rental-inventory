@@ -31,9 +31,8 @@ urlpatterns = [
     path("inventory/", include("inventory.urls")),
     path("rentals/", include("rentals.urls")),
     path("payments/", include("payments.urls")),
-    # path("accounts/", include("allauth.urls")), # Include allauth account management URLs
-    path("accounts/", include("allauth.account.urls")), # Use only account URLs, excluding social
-    path("users/", include("users.urls")),
+    path("users/", include("users.urls")),  # Keep users URLs first
+    path("accounts/", include("allauth.urls")),  # Include all allauth URLs
 ]
 
 # Serve media files in development (keep this)

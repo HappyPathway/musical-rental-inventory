@@ -1,82 +1,106 @@
 {% extends "inventory/base_inventory.html" %}
+{% load static %}
 
 {% block inventory_title %}Equipment Inventory{% endblock %}
 
 {% block inventory_content %}
-<div class="row mb-4">
-    <div class="col-md-8">
-        <form action="{% url 'inventory:equipment_list' %}" method="get" class="d-flex flex-wrap gap-2">
-            <div class="input-group me-2 mb-2 mb-md-0" style="max-width: 250px;">
-                <input type="text" name="search" class="form-control" placeholder="Search..." value="{{ search_query }}">
-                <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></button>
+<!-- Filter Form -->
+<div class="inventory-filter-form mb-4">
+    <form action="{% url 'inventory:equipment_list' %}" method="get" class="filter-form">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-6 col-lg-4">
+                <label for="search" class="form-label">Search</label>
+                <div class="input-group">
+                    <input type="text" id="search" name="search" class="form-control" placeholder="Name, brand, serial..." value="{{ search_query }}">
+                    <button class="btn btn-outline-secondary" type="submit" aria-label="Search">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
             </div>
-            
-            <select name="category" class="form-select me-2 mb-2 mb-md-0" style="max-width: 200px;">
-                <option value="">All Categories</option>
-                {% for category in categories %}
-                <option value="{{ category.id }}" {% if category.id|stringformat:"i" == category_id %}selected{% endif %}>
-                    {{ category.name }}
-                </option>
-                {% endfor %}
-            </select>
-            
-            <select name="status" class="form-select me-2 mb-2 mb-md-0" style="max-width: 200px;">
-                <option value="">All Status</option>
-                {% for status_value, status_label in status_choices %}
-                <option value="{{ status_value }}" {% if status_value == status %}selected{% endif %}>
-                    {{ status_label }}
-                </option>
-                {% endfor %}
-            </select>
-            
-            <button type="submit" class="btn btn-primary mb-2 mb-md-0">Filter</button>
-            <a href="{% url 'inventory:equipment_list' %}" class="btn btn-outline-secondary mb-2 mb-md-0">Clear</a>
-        </form>
-    </div>
-    <div class="col-md-4 text-md-end mt-3 mt-md-0">
-        {% if user.is_staff %}
-        <a href="{% url 'inventory:equipment_add' %}" class="btn btn-success">
+            <div class="col-md-6 col-lg-{% if user.is_staff %}3{% else %}4{% endif %}">
+                <label for="category" class="form-label">Category</label>
+                <select id="category" name="category" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}" {% if category.id|stringformat:"i" == category_id %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% if user.is_staff %}
+            <div class="col-md-6 col-lg-3">
+                <label for="status" class="form-label">Status</label>
+                <select id="status" name="status" class="form-select">
+                    <option value="">All Status</option>
+                    {% for status_value, status_label in status_choices %}
+                    <option value="{{ status_value }}" {% if status_value == status %}selected{% endif %}>
+                        {{ status_label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            <div class="col-md-6 col-lg-{% if user.is_staff %}2{% else %}4{% endif %} d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-filter me-1"></i> Filter
+                </button>
+                <a href="{% url 'inventory:equipment_list' %}" class="btn btn-outline-secondary w-100">
+                    <i class="fas fa-times me-1"></i> Clear
+                </a>
+            </div>
+        </div>
+    </form>
+    
+    {% if user.is_staff %}
+    <div class="d-flex justify-content-end mt-3">
+        <a href="{% url 'inventory:equipment_add' %}" class="btn btn-success me-2">
             <i class="fas fa-plus"></i> Add Equipment
         </a>
         <a href="{% url 'inventory:equipment_scan' %}" class="btn btn-info">
             <i class="fas fa-qrcode"></i> Scan QR
         </a>
-        {% endif %}
     </div>
+    {% endif %}
 </div>
 
-<div class="row">
+<!-- Equipment Grid -->
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
     {% if equipment %}
         {% for item in equipment %}
-        <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
-            <div class="card h-100 equipment-card">
+        <div class="col d-flex align-items-stretch">
+            <div class="card equipment-card w-100">
                 {% if item.status != 'available' %}
                 <div class="status-badge">
                     <span class="badge rounded-pill 
-                        {% if item.status == 'rented' %}bg-danger{% elif item.status == 'maintenance' %}bg-warning{% else %}bg-secondary{% endif %}">
+                        {% if item.status == 'rented' %}bg-danger{% elif item.status == 'maintenance' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
                         {{ item.get_status_display }}
                     </span>
                 </div>
                 {% endif %}
                 
-                {% if item.main_image %}
-                <img src="{{ item.main_image.url }}" class="card-img-top" alt="{{ item.name }}">
-                {% else %}
-                <div class="card-img-top bg-light d-flex justify-content-center align-items-center">
-                    <i class="fas fa-guitar fa-5x text-secondary"></i>
-                </div>
-                {% endif %}
+                <a href="{% url 'inventory:equipment_detail' pk=item.id %}">
+                    {% if item.main_image %}
+                    <img src="{{ item.main_image.url }}" class="card-img-top" alt="{{ item.name }}">
+                    {% else %}
+                    <div class="card-img-top card-icon-placeholder d-flex justify-content-center align-items-center">
+                        <i class="fas fa-guitar fa-3x text-secondary"></i>
+                    </div>
+                    {% endif %}
+                </a>
                 
-                <div class="card-body">
-                    <h5 class="card-title">{{ item.name }}</h5>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">
+                        <a href="{% url 'inventory:equipment_detail' pk=item.id %}" class="text-decoration-none" style="color: #F0E6D2;">{{ item.name }}</a>
+                    </h5>
                     <h6 class="card-subtitle mb-2 text-muted">{{ item.brand }}</h6>
-                    <p class="card-text">
-                        <small>Category: {{ item.category.name }}</small><br>
-                        <strong>${{ item.rental_price_daily }}/day</strong>
+                    <p class="card-text mt-auto">
+                        <small class="d-block text-muted">Category: {{ item.category.name }}</small>
+                        <span class="price-tag">${{ item.rental_price_daily }}/day</span>
                     </p>
                 </div>
-                <div class="card-footer bg-white border-top-0">
-                    <a href="{% url 'inventory:equipment_detail' pk=item.id %}" class="btn btn-sm btn-primary w-100">View Details</a>
+                <div class="card-footer bg-transparent border-top-0 p-3">
+                    <a href="{% url 'inventory:equipment_detail' pk=item.id %}" class="btn btn-primary w-100">View Details</a>
                 </div>
             </div>
         </div>

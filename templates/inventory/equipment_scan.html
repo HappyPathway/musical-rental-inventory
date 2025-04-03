@@ -1,192 +1,103 @@
-{% extends "inventory/base_inventory.html" %}
+{% extends "base.html" %}
+{% load static %}
 
-{% block inventory_title %}Scan QR Code{% endblock %}
+{% block title %}Scan Equipment{% endblock %}
 
-{% block inventory_head %}
-<style>
-    #scanner-container {
-        position: relative;
-        width: 100%;
-        max-width: 500px;
-        margin: 0 auto;
-    }
-    
-    #scanner {
-        width: 100%;
-        height: 400px;
-        border: 3px solid #333;
-        border-radius: 8px;
-        overflow: hidden;
-    }
-    
-    .overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        background-color: rgba(0, 0, 0, 0.7);
-        z-index: 10;
-    }
-    
-    .scanner-message {
-        color: white;
-        font-size: 1.2rem;
-        text-align: center;
-        max-width: 80%;
-    }
-</style>
-{% endblock %}
-
-{% block inventory_content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">Scan Equipment QR Code</h5>
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8 offset-md-2">
+            <h1 class="mb-3">Scan Equipment QR Code</h1>
+            <p class="lead">Use your device camera to scan an equipment QR code or enter a serial number manually.</p>
+            
+            <div class="card shadow bg-dark mb-4">
+                <div class="card-body">
+                    <div id="camera-container" class="mb-3">
+                        <video id="preview" class="w-100 rounded"></video>
+                    </div>
+                    
+                    <div id="scan-status" class="alert alert-info">
+                        Waiting for camera access...
+                    </div>
+                    
+                    <div class="btn-group w-100 mb-3">
+                        <button id="start-button" class="btn btn-primary">Start Camera</button>
+                        <button id="stop-button" class="btn btn-secondary" disabled>Stop Camera</button>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <p class="text-center mb-4">
-                    Scan a QR code from your equipment to quickly access its details.
-                </p>
-                
-                <div id="scanner-container" class="mb-4">
-                    <div id="scanner"></div>
-                    <div id="overlay" class="overlay">
-                        <div class="spinner-border text-light mb-3" role="status">
-                            <span class="visually-hidden">Loading...</span>
+            
+            <div class="card shadow bg-dark">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Manual Lookup</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{% url 'inventory:equipment_scan_result' %}" method="get">
+                        <div class="input-group mb-3">
+                            <input type="text" name="id" class="form-control" placeholder="Enter equipment ID or serial number">
+                            <button class="btn btn-primary" type="submit">Search</button>
                         </div>
-                        <p class="scanner-message" id="scanner-message">Initializing camera...</p>
-                        <button id="camera-permission-btn" class="btn btn-primary mt-3 d-none">
-                            Enable Camera
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="text-center">
-                    <p id="scan-result" class="mb-3"></p>
-                    <div id="action-buttons" class="d-none">
-                        <a href="#" id="view-btn" class="btn btn-primary">
-                            <i class="fas fa-eye"></i> View Equipment
-                        </a>
-                        <button id="scan-again-btn" class="btn btn-secondary">
-                            <i class="fas fa-redo"></i> Scan Again
-                        </button>
-                    </div>
+                    </form>
                 </div>
             </div>
-        </div>
-        
-        <div class="alert alert-info">
-            <h5><i class="fas fa-info-circle"></i> How to use the QR scanner</h5>
-            <ol>
-                <li>Make sure you have good lighting on the QR code</li>
-                <li>Position the QR code within the camera view</li>
-                <li>Hold steady until the scanner detects the code</li>
-                <li>Once detected, you'll be able to view the equipment details</li>
-            </ol>
         </div>
     </div>
 </div>
-{% endblock %}
 
 {% block extra_js %}
-<script src="https://unpkg.com/html5-qrcode@2.3.0/html5-qrcode.min.js"></script>
+<script src="https://unpkg.com/@zxing/library@latest"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const scanner = document.getElementById('scanner');
-        const overlay = document.getElementById('overlay');
-        const scannerMessage = document.getElementById('scanner-message');
-        const scanResult = document.getElementById('scan-result');
-        const actionButtons = document.getElementById('action-buttons');
-        const viewBtn = document.getElementById('view-btn');
-        const scanAgainBtn = document.getElementById('scan-again-btn');
-        const cameraPermissionBtn = document.getElementById('camera-permission-btn');
+        const cameraPreview = document.getElementById('preview');
+        const startButton = document.getElementById('start-button');
+        const stopButton = document.getElementById('stop-button');
+        const scanStatus = document.getElementById('scan-status');
         
-        let html5QrCode;
+        let codeReader = new ZXing.BrowserMultiFormatReader();
         
-        function startScanner() {
-            html5QrCode = new Html5Qrcode("scanner");
+        startButton.addEventListener('click', function() {
+            startButton.disabled = true;
+            stopButton.disabled = false;
+            scanStatus.className = 'alert alert-info';
+            scanStatus.textContent = 'Scanning for QR codes...';
             
-            const config = { 
-                fps: 10,
-                qrbox: 250,
-                aspectRatio: 1.0
-            };
-            
-            html5QrCode.start(
-                { facingMode: "environment" },
-                config,
-                onScanSuccess,
-                onScanFailure
-            ).catch(function(err) {
-                // Camera permission denied or other error
-                scannerMessage.textContent = "Camera access denied. Please enable camera access.";
-                cameraPermissionBtn.classList.remove('d-none');
-                console.error(err);
+            codeReader.decodeFromVideoDevice(null, 'preview', (result, err) => {
+                if (result) {
+                    // Successfully scanned QR code
+                    let scannedUrl = result.getText();
+                    
+                    // Try to extract equipment ID from URL
+                    try {
+                        let url = new URL(scannedUrl);
+                        let pathParts = url.pathname.split('/');
+                        let equipmentId = pathParts.find(part => /^\d+$/.test(part));
+                        
+                        if (equipmentId) {
+                            window.location.href = `/inventory/${equipmentId}/`;
+                        } else {
+                            scanStatus.className = 'alert alert-warning';
+                            scanStatus.textContent = 'Could not find equipment ID in QR code.';
+                        }
+                    } catch (e) {
+                        scanStatus.className = 'alert alert-warning';
+                        scanStatus.textContent = 'Invalid QR code: ' + scannedUrl;
+                    }
+                }
+                
+                if (err && !(err instanceof ZXing.NotFoundException)) {
+                    scanStatus.className = 'alert alert-danger';
+                    scanStatus.textContent = 'Error: ' + err;
+                }
             });
-            
-            cameraPermissionBtn.addEventListener('click', function() {
-                startScanner();
-                cameraPermissionBtn.classList.add('d-none');
-            });
-        }
-        
-        function onScanSuccess(decodedText, decodedResult) {
-            // Stop scanning
-            html5QrCode.stop().then(() => {
-                overlay.style.display = 'none';
-                
-                // Display the result
-                scanResult.innerHTML = `<div class="alert alert-success">
-                    <strong>QR Code detected!</strong><br>
-                    URL: ${decodedText}
-                </div>`;
-                
-                // Show action buttons
-                actionButtons.classList.remove('d-none');
-                
-                // Set the view button URL
-                viewBtn.href = decodedText;
-                
-                // Process the URL if needed (e.g., send to server to validate)
-                processScannedUrl(decodedText);
-            });
-        }
-        
-        function onScanFailure(error) {
-            // Silent failure
-            console.log(error);
-        }
-        
-        function processScannedUrl(url) {
-            // You can add validation here if needed
-            // For example, make sure it's a valid equipment URL
-            if (url.includes('/inventory/')) {
-                console.log("Valid equipment URL detected");
-            }
-        }
-        
-        scanAgainBtn.addEventListener('click', function() {
-            // Reset UI
-            scanResult.innerHTML = '';
-            actionButtons.classList.add('d-none');
-            overlay.style.display = 'flex';
-            scannerMessage.textContent = 'Ready to scan...';
-            
-            // Start scanning again
-            startScanner();
         });
         
-        // Start the scanner on page load
-        setTimeout(() => {
-            startScanner();
-            scannerMessage.textContent = 'Ready to scan...';
-        }, 1000);
+        stopButton.addEventListener('click', function() {
+            codeReader.reset();
+            startButton.disabled = false;
+            stopButton.disabled = true;
+            scanStatus.className = 'alert alert-secondary';
+            scanStatus.textContent = 'Camera stopped.';
+        });
     });
 </script>
 {% endblock %}

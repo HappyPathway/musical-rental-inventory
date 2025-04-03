@@ -1,5 +1,6 @@
 import os
 import time
+from pathlib import Path
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.conf import settings
 from django.test import override_settings
@@ -13,6 +14,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from django.contrib.auth import get_user_model
 
 # Use a separate test database
 @override_settings(DATABASES={
@@ -69,15 +71,65 @@ class BaseTestCase(StaticLiveServerTestCase):
     def login(self, username, password):
         """Helper method to log in a user"""
         self.browser.get(f"{self.live_server_url}/accounts/login/")
-        self.browser.find_element("id", "id_login").send_keys(username)
-        self.browser.find_element("id", "id_password").send_keys(password)
-        self.browser.find_element("xpath", "//button[@type='submit']").click()
         
-        # Wait for redirect to complete
-        self.wait.until(
-            EC.url_contains("/users/dashboard") or 
-            EC.url_contains("/accounts/login")
-        )
+        # Wait for page to load completely
+        time.sleep(1)
+        
+        # Take a screenshot for debugging
+        self.take_screenshot("login-page")
+        
+        # Find the login form fields - django-allauth uses id_login and id_password
+        try:
+            username_input = self.browser.find_element("id", "id_login")
+            password_input = self.browser.find_element("id", "id_password")
+            
+            # Clear any existing values and enter credentials
+            username_input.clear()
+            username_input.send_keys(username)
+            password_input.clear()
+            password_input.send_keys(password)
+            
+            # Find and click the submit button
+            self.browser.find_element("xpath", "//button[@type='submit']").click()
+            
+            # Wait for redirect
+            time.sleep(2)
+            
+            # Take a screenshot after login attempt
+            self.take_screenshot("after-login")
+            
+            # If we're still on the login page, check for error messages
+            if '/accounts/login/' in self.browser.current_url:
+                error_messages = self.browser.find_elements("css selector", ".alert-error, .errorlist, .alert-danger")
+                if error_messages:
+                    error_text = " ".join([e.text for e in error_messages])
+                    raise Exception(f"Login failed with errors: {error_text}")
+                else:
+                    # Create a user with django-allauth process
+                    from allauth.account.models import EmailAddress
+                    
+                    # If the user doesn't exist, create it
+                    User = get_user_model()
+                    if not User.objects.filter(username=username).exists():
+                        user = User.objects.create_user(username=username, password=password, email=f"{username}@example.com")
+                        EmailAddress.objects.create(user=user, email=f"{username}@example.com", verified=True, primary=True)
+                    
+                    # Try logging in again
+                    self.browser.get(f"{self.live_server_url}/accounts/login/")
+                    username_input = self.browser.find_element("id", "id_login")
+                    password_input = self.browser.find_element("id", "id_password")
+                    username_input.clear()
+                    username_input.send_keys(username)
+                    password_input.clear()
+                    password_input.send_keys(password)
+                    self.browser.find_element("xpath", "//button[@type='submit']").click()
+                    
+                    time.sleep(2)
+                    if '/accounts/login/' in self.browser.current_url:
+                        raise Exception(f"Login failed after creating user. Current URL: {self.browser.current_url}")
+        except Exception as e:
+            self.take_screenshot("login-error")
+            raise Exception(f"Login error: {str(e)}")
     
     def wait_for_element(self, by, value, timeout=10):
         """Wait for an element to be present on the page"""

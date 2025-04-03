@@ -82,6 +82,20 @@ class AttachmentForm(forms.ModelForm):
             'file': forms.ClearableFileInput(attrs={'class': 'form-control'})
         }
 
+    def clean_file(self):
+        file = self.cleaned_data.get('file')
+        if file:
+            # Check file size (max 10MB)
+            if file.size > 10 * 1024 * 1024:
+                raise forms.ValidationError("File size must be under 10MB")
+            
+            # Check file type
+            allowed_types = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif']
+            if file.content_type not in allowed_types:
+                raise forms.ValidationError("File type not allowed. Allowed types: PDF, JPEG, PNG, GIF")
+            
+        return file
+
 class MaintenanceRecordForm(forms.ModelForm):
     """Form for recording maintenance activities."""
     

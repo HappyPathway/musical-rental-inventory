@@ -1,0 +1,26 @@
+name: Deploy to GCP with Cloud Build
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: 'Google Auth'
+      id: 'auth' 
+      uses: 'google-github-actions/auth@v1'
+      with:
+        credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
+        create_credentials_file: true
+    
+    - name: Trigger Cloud Build
+      run: |
+        gcloud builds submit --config=cloudbuild.yaml \
+          --substitutions=_GS_BUCKET_NAME=roknsound-music-rental-inventory,_REGION=us-central1

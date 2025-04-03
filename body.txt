@@ -1,0 +1,1 @@
+## Test Cases\n- [ ] Access registration page from home page\n- [ ] Access registration page from login page

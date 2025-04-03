@@ -1,5 +1,6 @@
 minimize typing
 use the virtualenv: source venv/bin/activate
+always use make targets, no raw commands.
 
 # Musical Rental Inventory System - Copilot Instructions
 

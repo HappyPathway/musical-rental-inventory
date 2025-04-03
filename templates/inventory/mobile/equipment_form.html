@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2 mobile-equipment-detail">
+    <div class="row mb-3">
+        <div class="col-12">
+            <h1>{{ title }}</h1>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" id="mobile-equipment-form">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            Please correct the errors below.
+        </div>
+        {% endif %}
+        
+        <!-- Basic Information Section -->
+        <div class="card bg-dark mb-3">
+            <div class="card-header">
+                <h5 class="card-title">Basic Information</h5>
+            </div>
+            <div class="card-body">
+                <!-- Name & Brand -->
+                <div class="mb-3">
+                    <label for="{{ form.name.id_for_label }}" class="form-label">Name *</label>
+                    {{ form.name|add_class:"form-control"|attr:"placeholder:Equipment name" }}
+                    {% if form.name.errors %}
+                    <div class="text-danger">{{ form.name.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label for="{{ form.brand.id_for_label }}" class="form-label">Brand *</label>
+                    {{ form.brand|add_class:"form-control"|attr:"placeholder:Manufacturer" }}
+                    {% if form.brand.errors %}
+                    <div class="text-danger">{{ form.brand.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <!-- Category Selection -->
+                <div class="mb-3">
+                    <label for="{{ form.category.id_for_label }}" class="form-label">Category *</label>
+                    {{ form.category|add_class:"form-select" }}
+                    {% if form.category.errors %}
+                    <div class="text-danger">{{ form.category.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <!-- Description -->
+                <div class="mb-3">
+                    <label for="{{ form.description.id_for_label }}" class="form-label">Description *</label>
+                    {{ form.description|add_class:"form-control"|attr:"rows:4"|attr:"placeholder:Detailed description of the equipment" }}
+                    {% if form.description.errors %}
+                    <div class="text-danger">{{ form.description.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Identification Section -->
+        <div class="card bg-dark mb-3">
+            <div class="card-header">
+                <h5 class="card-title">Identification</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="{{ form.model_number.id_for_label }}" class="form-label">Model Number</label>
+                    {{ form.model_number|add_class:"form-control"|attr:"placeholder:Model number" }}
+                </div>
+                
+                <div class="mb-3">
+                    <label for="{{ form.serial_number.id_for_label }}" class="form-label">Serial Number</label>
+                    {{ form.serial_number|add_class:"form-control"|attr:"placeholder:Unique serial number" }}
+                    {% if form.serial_number.errors %}
+                    <div class="text-danger">{{ form.serial_number.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <!-- Add camera capture button for serial number scanning -->
+                <button type="button" id="scan-serial" class="btn btn-secondary mb-3">Scan Serial Number</button>
+                <div id="camera-container-serial" class="d-none mb-3">
+                    <video id="scanner-serial" class="w-100 rounded"></video>
+                    <button type="button" id="cancel-scan-serial" class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2">✕</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Financial Information -->
+        <div class="card bg-dark mb-3">
+            <div class="card-header">
+                <h5 class="card-title">Pricing & Financial</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <label for="{{ form.purchase_date.id_for_label }}" class="form-label">Purchase Date</label>
+                        {{ form.purchase_date|add_class:"form-control"|attr:"type:date" }}
+                    </div>
+                    
+                    <div class="col-6">
+                        <label for="{{ form.purchase_price.id_for_label }}" class="form-label">Purchase Price</label>
+                        {{ form.purchase_price|add_class:"form-control"|attr:"placeholder:0.00"|attr:"type:number"|attr:"step:0.01" }}
+                    </div>
+                </div>
+                
+                <div class="row g-3 mt-2">
+                    <div class="col-6">
+                        <label for="{{ form.rental_price_daily.id_for_label }}" class="form-label">Daily Rate *</label>
+                        {{ form.rental_price_daily|add_class:"form-control"|attr:"placeholder:0.00"|attr:"type:number"|attr:"step:0.01" }}
+                        {% if form.rental_price_daily.errors %}
+                        <div class="text-danger">{{ form.rental_price_daily.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-6">
+                        <label for="{{ form.rental_price_weekly.id_for_label }}" class="form-label">Weekly Rate *</label>
+                        {{ form.rental_price_weekly|add_class:"form-control"|attr:"placeholder:0.00"|attr:"type:number"|attr:"step:0.01" }}
+                        {% if form.rental_price_weekly.errors %}
+                        <div class="text-danger">{{ form.rental_price_weekly.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="row g-3 mt-2">
+                    <div class="col-6">
+                        <label for="{{ form.rental_price_monthly.id_for_label }}" class="form-label">Monthly Rate *</label>
+                        {{ form.rental_price_monthly|add_class:"form-control"|attr:"placeholder:0.00"|attr:"type:number"|attr:"step:0.01" }}
+                        {% if form.rental_price_monthly.errors %}
+                        <div class="text-danger">{{ form.rental_price_monthly.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-6">
+                        <label for="{{ form.deposit_amount.id_for_label }}" class="form-label">Deposit Amount *</label>
+                        {{ form.deposit_amount|add_class:"form-control"|attr:"placeholder:0.00"|attr:"type:number"|attr:"step:0.01" }}
+                        {% if form.deposit_amount.errors %}
+                        <div class="text-danger">{{ form.deposit_amount.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Status & Condition -->
+        <div class="card bg-dark mb-3">
+            <div class="card-header">
+                <h5 class="card-title">Status & Condition</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="{{ form.status.id_for_label }}" class="form-label">Status *</label>
+                    {{ form.status|add_class:"form-select" }}
+                </div>
+                
+                <div class="mb-3">
+                    <label for="{{ form.condition.id_for_label }}" class="form-label">Condition</label>
+                    {{ form.condition|add_class:"form-control"|attr:"rows:2"|attr:"placeholder:Current condition of the equipment" }}
+                </div>
+                
+                <div class="mb-3">
+                    <label for="{{ form.notes.id_for_label }}" class="form-label">Notes</label>
+                    {{ form.notes|add_class:"form-control"|attr:"rows:2"|attr:"placeholder:Additional notes" }}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Media & Attachments -->
+        <div class="card bg-dark mb-3">
+            <div class="card-header">
+                <h5 class="card-title">Media</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="{{ form.main_image.id_for_label }}" class="form-label">Main Image</label>
+                    {{ form.main_image|add_class:"form-control" }}
+                </div>
+                
+                <!-- Camera capture for equipment photo -->
+                <button type="button" id="capture-photo" class="btn btn-secondary mb-3">Take Photo with Camera</button>
+                <div id="camera-container-photo" class="d-none mb-3">
+                    <video id="camera-preview" class="w-100 rounded"></video>
+                    <button type="button" id="capture-snapshot" class="btn btn-primary position-absolute bottom-0 start-50 translate-middle-x mb-3">Capture</button>
+                    <button type="button" id="cancel-capture" class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2">✕</button>
+                    <canvas id="photo-canvas" class="d-none"></canvas>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="attachments" class="form-label">Additional Attachments</label>
+                    <input type="file" class="form-control" id="attachments" name="attachments" multiple>
+                    <div class="form-text">Upload manuals, warranty cards, or other documents.</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Form Buttons -->
+        <div class="d-grid gap-2 mb-4">
+            <button type="submit" class="btn btn-primary">Save Equipment</button>
+            <a href="{% url 'inventory:equipment_list' %}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+{% block extra_js %}
+<script src="https://unpkg.com/@zxing/library@latest"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Serial number scanning
+        const scanSerialBtn = document.getElementById('scan-serial');
+        const cameraContainerSerial = document.getElementById('camera-container-serial');
+        const scannerSerial = document.getElementById('scanner-serial');
+        const cancelScanSerialBtn = document.getElementById('cancel-scan-serial');
+        const serialNumberInput = document.getElementById('{{ form.serial_number.id_for_label }}');
+        
+        let codeReader;
+        
+        // Initialize scanner
+        scanSerialBtn.addEventListener('click', function() {
+            cameraContainerSerial.classList.remove('d-none');
+            this.classList.add('d-none');
+            
+            codeReader = new ZXing.BrowserMultiFormatReader();
+            
+            codeReader.listVideoInputDevices()
+                .then(videoInputDevices => {
+                    // Use rear camera if available
+                    const device = videoInputDevices.find(d => 
+                        d.label.toLowerCase().includes('back') || 
+                        d.label.toLowerCase().includes('rear')
+                    ) || videoInputDevices[0];
+                    
+                    codeReader.decodeFromVideoDevice(
+                        device?.deviceId,
+                        scannerSerial, 
+                        (result, err) => {
+                            if (result) {
+                                // Success! Close camera and set value
+                                serialNumberInput.value = result.getText();
+                                stopScanner();
+                                showToast('Serial number scanned!', 'success');
+                            }
+                            
+                            if (err && !(err instanceof ZXing.NotFoundException)) {
+                                console.error(err);
+                            }
+                        }
+                    );
+                })
+                .catch(err => {
+                    console.error(err);
+                    showToast('Camera error: ' + err, 'danger');
+                    stopScanner();
+                });
+        });
+        
+        cancelScanSerialBtn.addEventListener('click', stopScanner);
+        
+        function stopScanner() {
+            if (codeReader) {
+                codeReader.reset();
+                cameraContainerSerial.classList.add('d-none');
+                scanSerialBtn.classList.remove('d-none');
+            }
+        }
+        
+        // Equipment photo capture
+        const capturePhotoBtn = document.getElementById('capture-photo');
+        const cameraContainerPhoto = document.getElementById('camera-container-photo');
+        const cameraPreview = document.getElementById('camera-preview');
+        const captureSnapshotBtn = document.getElementById('capture-snapshot');
+        const cancelCaptureBtn = document.getElementById('cancel-capture');
+        const photoCanvas = document.getElementById('photo-canvas');
+        
+        let stream;
+        
+        capturePhotoBtn.addEventListener('click', function() {
+            cameraContainerPhoto.classList.remove('d-none');
+            this.classList.add('d-none');
+            
+            navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: 'environment',
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                } 
+            })
+            .then(mediaStream => {
+                stream = mediaStream;
+                cameraPreview.srcObject = mediaStream;
+                cameraPreview.play();
+            })
+            .catch(err => {
+                console.error(err);
+                showToast('Camera error: ' + err, 'danger');
+                stopCamera();
+            });
+        });
+        
+        captureSnapshotBtn.addEventListener('click', function() {
+            // Set canvas dimensions to match video
+            photoCanvas.width = cameraPreview.videoWidth;
+            photoCanvas.height = cameraPreview.videoHeight;
+            
+            // Draw the video frame to the canvas
+            const ctx = photoCanvas.getContext('2d');
+            ctx.drawImage(cameraPreview, 0, 0, photoCanvas.width, photoCanvas.height);
+            
+            // Convert canvas to blob and create a File object
+            photoCanvas.toBlob(blob => {
+                const fileName = 'equipment_photo_' + new Date().getTime() + '.jpg';
+                const file = new File([blob], fileName, { type: 'image/jpeg' });
+                
+                // Create a FileList-like object to set the file input value
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                
+                // Set the file input value
+                document.getElementById('{{ form.main_image.id_for_label }}').files = dataTransfer.files;
+                
+                showToast('Photo captured!', 'success');
+                stopCamera();
+            }, 'image/jpeg', 0.95);
+        });
+        
+        cancelCaptureBtn.addEventListener('click', stopCamera);
+        
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                cameraContainerPhoto.classList.add('d-none');
+                capturePhotoBtn.classList.remove('d-none');
+            }
+        }
+        
+        // Simple toast notification
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `toast-notification toast-${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

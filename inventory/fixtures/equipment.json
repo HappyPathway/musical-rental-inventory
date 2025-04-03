@@ -28,7 +28,7 @@
         "fields": {
             "name": "Fender Precision Bass",
             "description": "American Professional II P-Bass in Olympic White",
-            "category": 2,
+            "category": 1,
             "brand": "Fender",
             "model_number": "AMPB22",
             "serial_number": "US21P1234",
@@ -74,7 +74,7 @@
         "fields": {
             "name": "QSC K12.2 PA System",
             "description": "Complete PA system with mixer and stands",
-            "category": 4,
+            "category": 5,
             "brand": "QSC",
             "model_number": "K12.2PKG",
             "serial_number": "QSC2023K12",
@@ -97,7 +97,7 @@
         "fields": {
             "name": "Shure SM7B",
             "description": "Professional dynamic microphone",
-            "category": 5,
+            "category": 6,
             "brand": "Shure",
             "model_number": "SM7B",
             "serial_number": "SM7B2024001",
@@ -120,7 +120,7 @@
         "fields": {
             "name": "Nord Stage 3 88",
             "description": "Professional stage piano with 88 weighted keys",
-            "category": 6,
+            "category": 4,
             "brand": "Nord",
             "model_number": "NS388",
             "serial_number": "NS3882024002",
@@ -143,7 +143,7 @@
         "fields": {
             "name": "Mesa/Boogie Dual Rectifier",
             "description": "100W tube head with 4x12 cabinet",
-            "category": 7,
+            "category": 2,
             "brand": "Mesa/Boogie",
             "model_number": "DR100",
             "serial_number": "MB2024DR003",
@@ -166,7 +166,7 @@
         "fields": {
             "name": "Ampeg SVT-4PRO",
             "description": "1000W bass head with 8x10 cabinet",
-            "category": 8,
+            "category": 2,
             "brand": "Ampeg",
             "model_number": "SVT4PRO",
             "serial_number": "AMPEG2024004",

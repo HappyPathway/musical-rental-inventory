@@ -13,6 +13,13 @@ class CustomerForm(forms.ModelForm):
             'address': forms.Textarea(attrs={'rows': 2}),
         }
 
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email:
+            if Customer.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
+                raise forms.ValidationError("A customer with this email already exists.")
+        return email
+
 class RentalForm(forms.ModelForm):
     class Meta:
         model = Rental
@@ -33,6 +40,14 @@ class RentalForm(forms.ModelForm):
         
         return cleaned_data
 
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if commit:
+            instance.total_price = 0  # Will be calculated after rental items are added
+            instance.deposit_total = 0  # Will be calculated after rental items are added
+            instance.save()
+        return instance
+
 class RentalItemForm(forms.ModelForm):
     equipment = forms.ModelChoiceField(
         queryset=Equipment.objects.filter(status='available'),
@@ -43,13 +58,38 @@ class RentalItemForm(forms.ModelForm):
         initial=1,
         widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '1'})
     )
+    price = forms.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'})
+    )
+    condition_note_checkout = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 2}),
+        required=False
+    )
     
     class Meta:
         model = RentalItem
         fields = ['equipment', 'quantity', 'price', 'condition_note_checkout']
-        widgets = {
-            'condition_note_checkout': forms.Textarea(attrs={'rows': 2}),
-        }
+
+    def clean_quantity(self):
+        quantity = self.cleaned_data.get('quantity')
+        if quantity is not None and quantity < 1:
+            raise forms.ValidationError("Quantity must be at least 1")
+        return quantity
+
+    def clean(self):
+        cleaned_data = super().clean()
+        equipment = cleaned_data.get('equipment')
+        quantity = cleaned_data.get('quantity')
+        
+        if equipment and quantity:
+            if equipment.status != 'available':
+                raise forms.ValidationError("This equipment is not available for rental")
+            if equipment.quantity_available < quantity:
+                raise forms.ValidationError(f"Only {equipment.quantity_available} items available")
+        
+        return cleaned_data
 
 class EquipmentSearchForm(forms.Form):
     query = forms.CharField(required=False, widget=forms.TextInput(attrs={
@@ -65,6 +105,12 @@ class ReturnRentalItemForm(forms.ModelForm):
         widgets = {
             'condition_note_return': forms.Textarea(attrs={'rows': 2}),
         }
+
+    def clean_condition_note_return(self):
+        condition_note = self.cleaned_data.get('condition_note_return')
+        if not condition_note:
+            raise forms.ValidationError("Please provide a condition note for the returned item")
+        return condition_note
 
 class ContractSignatureForm(forms.Form):
     signature = forms.CharField(widget=forms.HiddenInput())

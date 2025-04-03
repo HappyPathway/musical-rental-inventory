@@ -14,4 +14,8 @@ urlpatterns = [
     path('scan-result/', views.equipment_scan_result, name='equipment_scan_result'),
     path('<int:pk>/add-maintenance/', views.add_maintenance_record, name='add_maintenance'),
     path('<int:pk>/add-attachment/', views.add_attachment, name='add_attachment'),
+    
+    # Mobile optimized routes
+    path('mobile/scan/', views.scan_equipment, name='mobile_scan'),
+    path('<int:pk>/status-update/', views.quick_status_update, name='quick_status_update'),
 ]

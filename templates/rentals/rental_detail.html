@@ -221,42 +221,33 @@
     </div>
 
     <!-- Action Buttons -->
-    <div class="row">
-        <div class="col-12 mb-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Actions</h5>
-                </div>
-                <div class="card-body">
-                    <div class="btn-group">
-                        <a href="{% url 'rentals:rental_edit' rental.id %}" class="btn btn-primary">
-                            <i class="fas fa-edit"></i> Edit Rental
-                        </a>
-                        
-                        {% if rental.status == 'pending' or rental.status == 'active' %}
-                        <a href="{% url 'payments:create' rental.id %}" class="btn btn-success">
-                            <i class="fas fa-money-bill-wave"></i> Make Payment
-                        </a>
-                        {% endif %}
-                        
-                        {% if rental.status == 'active' %}
-                        <a href="{% url 'rentals:rental_return' rental.id %}" class="btn btn-info">
-                            <i class="fas fa-undo"></i> Process Return
-                        </a>
-                        {% endif %}
-                        
-                        {% if rental.status == 'pending' %}
-                        <a href="{% url 'rentals:rental_cancel' rental.id %}" class="btn btn-danger">
-                            <i class="fas fa-times"></i> Cancel Rental
-                        </a>
-                        {% endif %}
-                        
-                        <a href="{% url 'rentals:rental_contract' rental.id %}" class="btn btn-secondary">
-                            <i class="fas fa-file-contract"></i> View Contract
-                        </a>
-                    </div>
-                </div>
-            </div>
+    <div class="row mt-4">
+        <div class="col-12">
+            <a href="{% url 'rentals:rental_update' rental.id %}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Edit Rental
+            </a>
+            
+            {% if rental.status == 'pending' or rental.status == 'active' %}
+            <a href="{% url 'payments:create' rental.id %}" class="btn btn-success">
+                <i class="fas fa-money-bill-wave"></i> Make Payment
+            </a>
+            {% endif %}
+            
+            {% if rental.status == 'active' %}
+            <a href="{% url 'rentals:rental_return' rental.id %}" class="btn btn-info">
+                <i class="fas fa-undo"></i> Process Return
+            </a>
+            {% endif %}
+            
+            {% if rental.status == 'pending' %}
+            <a href="{% url 'rentals:rental_cancel' rental.id %}" class="btn btn-danger">
+                <i class="fas fa-times"></i> Cancel Rental
+            </a>
+            {% endif %}
+            
+            <a href="{% url 'rentals:rental_contract' rental.id %}" class="btn btn-secondary">
+                <i class="fas fa-file-contract"></i> View Contract
+            </a>
         </div>
     </div>
 </div>

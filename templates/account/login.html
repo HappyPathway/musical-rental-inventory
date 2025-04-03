@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load account socialaccount %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% trans "LOG IN" %} - ROKNSOUND{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="login-card">
+                <div class="login-header">
+                    <h1 class="text-white mb-4">{% trans "LOG IN" %}</h1>
+                </div>
+                <form class="login" method="POST" action="{% url 'account_login' %}">
+                    {% csrf_token %}
+                    {% if redirect_field_value %}
+                    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                    {% endif %}
+                    
+                    {{ form|crispy }}
+                    
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="d-grid mt-4">
+                        <button class="btn btn-sign-in" type="submit">{% trans "LOG IN" %}</button>
+                    </div>
+
+                    <div class="mt-4 text-center">
+                        <p class="text-white">
+                            {% trans "Don't have an account?" %} <a href="{{ signup_url }}" class="text-accent">{% trans "Register" %}</a>
+                        </p>
+                        <p>
+                            <a href="{% url 'account_reset_password' %}" class="text-accent">{% trans "Forgot your password?" %}</a>
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

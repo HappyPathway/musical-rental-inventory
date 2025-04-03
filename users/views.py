@@ -134,12 +134,21 @@ def update_profile(request):
     if request.method == 'POST':
         user_form = UserUpdateForm(request.POST, instance=request.user)
         profile_form = UserProfileUpdateForm(request.POST, instance=request.user.profile)
+        print(f"Form data: {request.POST}")  # Debug
         
         if user_form.is_valid() and profile_form.is_valid():
-            user_form.save()
-            profile_form.save()
+            print("Forms are valid")  # Debug
+            user = user_form.save()
+            profile = profile_form.save(commit=False)
+            profile.user = user
+            profile.save()
+            
             messages.success(request, 'Your profile was successfully updated!')
-            return redirect('users:view_profile')
+            return HttpResponseRedirect(reverse('users:view_profile'))
+        else:
+            print(f"User form errors: {user_form.errors}")  # Debug
+            print(f"Profile form errors: {profile_form.errors}")  # Debug
+            messages.error(request, 'Please correct the errors below.')
     else:
         user_form = UserUpdateForm(instance=request.user)
         profile_form = UserProfileUpdateForm(instance=request.user.profile)
@@ -152,7 +161,11 @@ def update_profile(request):
 
 @login_required
 def view_profile(request):
-    return render(request, 'users/view_profile.html')
+    context = {
+        'profile': request.user.profile,
+        'user': request.user
+    }
+    return render(request, 'users/view_profile.html', context)
 
 # User management views for administrators
 @admin_required

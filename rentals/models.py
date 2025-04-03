@@ -115,6 +115,17 @@ class Rental(models.Model):
     def balance_due(self):
         # Calculate the remaining balance
         return self.total_price - self.amount_paid
+    
+    def clean(self):
+        """Validate that end_date is not before start_date"""
+        if self.end_date and self.start_date and self.end_date < self.start_date:
+            from django.core.exceptions import ValidationError
+            raise ValidationError("End date cannot be before start date")
+    
+    def save(self, *args, **kwargs):
+        """Call clean() before saving"""
+        self.full_clean()
+        super().save(*args, **kwargs)
 
 class RentalItem(models.Model):
     rental = models.ForeignKey(Rental, on_delete=models.CASCADE, related_name='items')

@@ -2,6 +2,7 @@ import os
 import uuid
 import json
 import requests
+import httpx
 from io import BytesIO
 from django.conf import settings
 from django.core.files.storage import default_storage
@@ -29,7 +30,8 @@ def fetch_manual_from_openai(brand, model_number):
     """
     Fetch manual download links from OpenAI for a specific equipment brand and model
     """
-    client = OpenAI(api_key=settings.OPENAI_API_KEY)
+    http_client = httpx.Client()
+    client = OpenAI(api_key=settings.OPENAI_API_KEY, http_client=http_client)
     
     try:
         # Query OpenAI for manual links

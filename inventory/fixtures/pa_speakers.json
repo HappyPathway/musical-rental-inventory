@@ -1,0 +1,10 @@
+[
+    {
+        "model": "inventory.category",
+        "pk": 1,
+        "fields": {
+            "name": "Powered PA Speakers",
+            "description": "Professional powered PA speakers for live sound reinforcement, featuring built-in amplification and versatile connectivity options."
+        }
+    }
+] 

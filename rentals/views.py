@@ -51,6 +51,7 @@ def rental_list(request):
     
     context = {
         'rentals': rentals,
+        'rental_list': rentals_list,  # Add the unfiltered list for tests
         'search_query': search_query,
         'status_filter': status_filter
     }

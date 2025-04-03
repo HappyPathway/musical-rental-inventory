@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ equipment.name }} - Mobile View{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2 mobile-equipment-detail">
+    <!-- Equipment Header Section -->
+    <div class="row mb-2">
+        <div class="col-12">
+            <div class="card bg-dark">
+                <div class="card-body">
+                    {% if equipment.main_image %}
+                    <img src="{{ equipment.main_image.url }}" class="img-fluid mb-3 rounded equipment-image" alt="{{ equipment.name }}">
+                    {% endif %}
+                    <h1 class="card-title">{{ equipment.name }}</h1>
+                    <p class="lead">{{ equipment.brand }} | {{ equipment.model_number }}</p>
+                    
+                    <!-- Mobile-optimized status indicator -->
+                    <div class="status-badge status-{{ equipment.status }} mb-3" id="status-badge">
+                        Status: {{ equipment.get_status_display }}
+                    </div>
+                    
+                    <!-- Quick Status Update - Mobile Specific -->
+                    <div class="quick-status-controls mb-3">
+                        <label class="form-label fw-bold">Quick Status Update:</label>
+                        <div class="btn-group d-flex flex-wrap" role="group">
+                            {% for status_code, status_name in status_choices %}
+                            <button type="button" 
+                                class="btn btn-sm quick-status-btn {% if equipment.status == status_code %}active{% endif %}" 
+                                data-status="{{ status_code }}"
+                                data-equipment-id="{{ equipment.id }}">
+                                {{ status_name }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Equipment Details Section - Optimized for Touch -->
+    <div class="row mb-2">
+        <div class="col-12">
+            <div class="card bg-dark">
+                <div class="card-body">
+                    <h5 class="card-title">Details</h5>
+                    <div class="info-item">
+                        <div class="row py-2 border-bottom border-secondary">
+                            <div class="col-5 fw-bold">Serial Number</div>
+                            <div class="col-7">{{ equipment.serial_number }}</div>
+                        </div>
+                        <div class="row py-2 border-bottom border-secondary">
+                            <div class="col-5 fw-bold">Category</div>
+                            <div class="col-7">{{ equipment.category.name }}</div>
+                        </div>
+                        <div class="row py-2 border-bottom border-secondary">
+                            <div class="col-5 fw-bold">Daily Rate</div>
+                            <div class="col-7">${{ equipment.rental_price_daily }}</div>
+                        </div>
+                        <div class="row py-2 border-bottom border-secondary">
+                            <div class="col-5 fw-bold">Weekly Rate</div>
+                            <div class="col-7">${{ equipment.rental_price_weekly }}</div>
+                        </div>
+                        <div class="row py-2 border-bottom border-secondary">
+                            <div class="col-5 fw-bold">Monthly Rate</div>
+                            <div class="col-7">${{ equipment.rental_price_monthly }}</div>
+                        </div>
+                        <div class="row py-2 border-bottom border-secondary">
+                            <div class="col-5 fw-bold">Deposit</div>
+                            <div class="col-7">${{ equipment.deposit_amount }}</div>
+                        </div>
+                        <div class="row py-2">
+                            <div class="col-5 fw-bold">Condition</div>
+                            <div class="col-7">{{ equipment.condition }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile-optimized Action Buttons -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-grid gap-2">
+                <a href="{% url 'inventory:equipment_edit' equipment.pk %}" class="btn btn-primary">Edit Equipment</a>
+                {% if equipment.qr_code %}
+                <a href="{{ equipment.qr_code.url }}" class="btn btn-secondary" download>Download QR Code</a>
+                {% else %}
+                <a href="{% url 'inventory:equipment_qr' equipment.pk %}" class="btn btn-secondary">Generate QR Code</a>
+                {% endif %}
+                <a href="{% url 'inventory:add_maintenance' equipment.pk %}" class="btn btn-info">Add Maintenance Record</a>
+                <a href="{% url 'inventory:add_attachment' equipment.pk %}" class="btn btn-info">Add Attachment</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick access tabs for mobile -->
+    <ul class="nav nav-tabs mb-3" id="equipmentTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab" aria-controls="description" aria-selected="true">Description</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="maintenance-tab" data-bs-toggle="tab" data-bs-target="#maintenance" type="button" role="tab" aria-controls="maintenance" aria-selected="false">Maintenance</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="attachments-tab" data-bs-toggle="tab" data-bs-target="#attachments" type="button" role="tab" aria-controls="attachments" aria-selected="false">Attachments</button>
+        </li>
+    </ul>
+    
+    <div class="tab-content" id="equipmentTabsContent">
+        <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="description-tab">
+            <div class="card bg-dark mb-3">
+                <div class="card-body">
+                    <p>{{ equipment.description }}</p>
+                    {% if equipment.notes %}
+                    <h6 class="mt-3">Notes:</h6>
+                    <p>{{ equipment.notes }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-pane fade" id="maintenance" role="tabpanel" aria-labelledby="maintenance-tab">
+            {% if maintenance_records %}
+            <div class="list-group mb-3">
+                {% for record in maintenance_records %}
+                <div class="list-group-item bg-dark text-light border-secondary">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{ record.date }}</h5>
+                        <small>{% if record.is_completed %}Completed{% else %}Scheduled{% endif %}</small>
+                    </div>
+                    <p class="mb-1">{{ record.description }}</p>
+                    {% if record.cost %}
+                    <small>Cost: ${{ record.cost }}</small>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info">No maintenance records yet.</div>
+            {% endif %}
+        </div>
+        
+        <div class="tab-pane fade" id="attachments" role="tabpanel" aria-labelledby="attachments-tab">
+            {% if attachments %}
+            <div class="list-group mb-3">
+                {% for attachment in attachments %}
+                <a href="{{ attachment.file.url }}" class="list-group-item list-group-item-action bg-dark text-light border-secondary" download>
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">Attachment</h5>
+                        <small>{{ attachment.uploaded_at|date }}</small>
+                    </div>
+                    <p class="mb-1">{% if attachment.description %}{{ attachment.description }}{% else %}Download file{% endif %}</p>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info">No attachments yet.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Mobile Quick Status Update
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusButtons = document.querySelectorAll('.quick-status-btn');
+        const equipmentId = {{ equipment.id }};
+        const statusBadge = document.getElementById('status-badge');
+        
+        statusButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const newStatus = this.dataset.status;
+                
+                fetch(`/inventory/${equipmentId}/status-update/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: `status=${newStatus}`
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Update UI to reflect the new status
+                        statusButtons.forEach(btn => btn.classList.remove('active'));
+                        this.classList.add('active');
+                        
+                        // Update the status badge
+                        statusBadge.className = `status-badge status-${newStatus} mb-3`;
+                        statusBadge.textContent = `Status: ${this.textContent.trim()}`;
+                        
+                        // Show success message
+                        showToast('Status updated successfully', 'success');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Failed to update status', 'danger');
+                });
+            });
+        });
+        
+        // Simple toast notification
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `toast-notification toast-${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+    });
+</script>
+{% endblock %}

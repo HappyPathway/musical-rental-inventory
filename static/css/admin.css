@@ -1,0 +1,239 @@
+/* ROKNSOUND - Admin Styles */
+
+/* Admin Theme Overrides */
+:root {
+    --admin-header-height: 60px;
+    --admin-sidebar-width: 250px;
+}
+
+/* Admin Header */
+#header {
+    background-color: var(--color-secondary) !important;
+    color: var(--color-text) !important;
+    height: var(--admin-header-height) !important;
+    padding: 0 var(--spacing-md) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+#header a:link, 
+#header a:visited {
+    color: var(--color-text) !important;
+}
+
+#branding h1 {
+    font-family: 'Bebas Neue', sans-serif !important;
+    font-size: 1.8rem !important;
+    color: var(--color-text) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 2px !important;
+}
+
+/* Admin Navigation */
+#nav-sidebar {
+    background-color: var(--color-dark) !important;
+    width: var(--admin-sidebar-width) !important;
+    padding: var(--spacing-md) 0 !important;
+}
+
+#nav-sidebar a {
+    color: var(--color-text) !important;
+    padding: var(--spacing-sm) var(--spacing-md) !important;
+    font-family: 'Oswald', sans-serif !important;
+    font-size: 0.9rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    transition: all var(--transition-normal) !important;
+}
+
+#nav-sidebar a:hover {
+    background-color: var(--color-gray) !important;
+    color: var(--color-primary) !important;
+}
+
+#nav-sidebar .selected a {
+    background-color: var(--color-primary) !important;
+    color: var(--color-text) !important;
+}
+
+/* Admin Content */
+#content {
+    padding: var(--spacing-lg) !important;
+    background-color: var(--color-secondary) !important;
+}
+
+#content-main {
+    background-color: var(--color-dark) !important;
+    border-radius: var(--radius-md) !important;
+    padding: var(--spacing-lg) !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+
+/* Admin Tables */
+#result_list {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin-bottom: var(--spacing-md) !important;
+}
+
+#result_list th {
+    background-color: var(--color-secondary) !important;
+    color: var(--color-accent) !important;
+    font-family: 'Oswald', sans-serif !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    padding: var(--spacing-sm) !important;
+    border-bottom: 2px solid var(--color-primary) !important;
+}
+
+#result_list td {
+    padding: var(--spacing-sm) !important;
+    border-top: 1px solid var(--color-gray) !important;
+    color: var(--color-text) !important;
+}
+
+/* Admin Forms */
+.form-row {
+    padding: var(--spacing-md) !important;
+    border-bottom: 1px solid var(--color-gray) !important;
+}
+
+.form-row:last-child {
+    border-bottom: none !important;
+}
+
+label {
+    color: var(--color-text) !important;
+    font-family: 'Oswald', sans-serif !important;
+    font-size: 0.9rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="url"],
+input[type="tel"],
+textarea,
+select {
+    background-color: var(--color-dark) !important;
+    border: 1px solid var(--color-gray) !important;
+    color: var(--color-text) !important;
+    padding: var(--spacing-sm) !important;
+    border-radius: var(--radius-sm) !important;
+    font-family: 'Open Sans', sans-serif !important;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+input[type="number"]:focus,
+input[type="url"]:focus,
+input[type="tel"]:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--color-primary) !important;
+    box-shadow: 0 0 0 0.2rem rgba(194, 59, 35, 0.25) !important;
+    outline: none !important;
+}
+
+/* Admin Buttons */
+.button,
+input[type="submit"],
+input[type="button"],
+.submit-row input,
+a.button {
+    background-color: var(--color-primary) !important;
+    color: var(--color-text) !important;
+    padding: var(--spacing-sm) var(--spacing-md) !important;
+    border: none !important;
+    border-radius: var(--radius-sm) !important;
+    font-family: 'Oswald', sans-serif !important;
+    font-size: 0.9rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    cursor: pointer !important;
+    transition: all var(--transition-normal) !important;
+}
+
+.button:hover,
+input[type="submit"]:hover,
+input[type="button"]:hover,
+.submit-row input:hover,
+a.button:hover {
+    background-color: var(--color-danger) !important;
+    color: var(--color-text) !important;
+}
+
+/* Admin Messages */
+.messagelist li {
+    padding: var(--spacing-md) !important;
+    margin-bottom: var(--spacing-sm) !important;
+    border-radius: var(--radius-sm) !important;
+    font-family: 'Open Sans', sans-serif !important;
+}
+
+.messagelist li.success {
+    background-color: rgba(72, 207, 173, 0.1) !important;
+    border: 1px solid var(--color-success) !important;
+    color: var(--color-success) !important;
+}
+
+.messagelist li.error {
+    background-color: rgba(194, 59, 35, 0.1) !important;
+    border: 1px solid var(--color-danger) !important;
+    color: var(--color-danger) !important;
+}
+
+/* Admin Breadcrumbs */
+div.breadcrumbs {
+    background-color: var(--color-gray) !important;
+    color: var(--color-text) !important;
+    padding: var(--spacing-sm) var(--spacing-md) !important;
+    font-family: 'Oswald', sans-serif !important;
+    font-size: 0.9rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+}
+
+div.breadcrumbs a {
+    color: var(--color-accent) !important;
+    text-decoration: none !important;
+}
+
+div.breadcrumbs a:hover {
+    color: var(--color-primary) !important;
+}
+
+/* Admin Pagination */
+.paginator {
+    margin: var(--spacing-lg) 0 !important;
+    padding: var(--spacing-sm) !important;
+    background-color: var(--color-gray) !important;
+    border-radius: var(--radius-sm) !important;
+}
+
+.paginator a,
+.paginator .this-page {
+    padding: var(--spacing-xs) var(--spacing-sm) !important;
+    margin: 0 var(--spacing-xs) !important;
+    border-radius: var(--radius-sm) !important;
+    color: var(--color-text) !important;
+    text-decoration: none !important;
+    transition: all var(--transition-normal) !important;
+}
+
+.paginator a:hover {
+    background-color: var(--color-primary) !important;
+    color: var(--color-text) !important;
+}
+
+.paginator .this-page {
+    background-color: var(--color-primary) !important;
+    color: var(--color-text) !important;
+} 

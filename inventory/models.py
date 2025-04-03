@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AbstractUser
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
@@ -10,6 +10,8 @@ import qrcode
 from io import BytesIO
 from django.core.files import File
 from PIL import Image, ImageDraw
+from django.core.validators import RegexValidator
+from phonenumber_field.modelfields import PhoneNumberField
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -46,6 +48,7 @@ class Equipment(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='available')
     condition = models.TextField(blank=True)
     notes = models.TextField(blank=True)
+    quantity = models.PositiveIntegerField(default=1)
     
     # QR Code related fields
     qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
@@ -133,6 +136,13 @@ class Equipment(models.Model):
     def is_available(self):
         return self.status == 'available'
 
+    @property
+    def quantity_available(self):
+        """Return the quantity available for rental."""
+        if self.status != 'available':
+            return 0
+        return self.quantity
+
 class EquipmentAttachment(models.Model):
     equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE, related_name='attachments')
     file = models.FileField(upload_to='equipment_attachments/')
@@ -176,3 +186,33 @@ class SearchLog(models.Model):
     
     def __str__(self):
         return f"{self.query} ({self.created_at.strftime('%Y-%m-%d %H:%M')})"
+
+class User(AbstractUser):
+    """Custom user model for the application."""
+    phone_regex = RegexValidator(
+        regex=r'^\+?1?\d{9,15}$',
+        message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed."
+    )
+    phone_number = PhoneNumberField(blank=True)
+    address = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    # Add related_name to avoid clashes with auth.User
+    groups = models.ManyToManyField(
+        'auth.Group',
+        verbose_name='groups',
+        blank=True,
+        help_text='The groups this user belongs to.',
+        related_name='custom_user_set'
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        verbose_name='user permissions',
+        blank=True,
+        help_text='Specific permissions for this user.',
+        related_name='custom_user_set'
+    )
+
+    def __str__(self):
+        return self.email

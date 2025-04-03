@@ -7,28 +7,265 @@
 <div class="row justify-content-center">
     <div class="col-md-8">
         <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <h4 class="my-0">Register New Account</h4>
+            <div class="card-header bg-dark border-bottom border-secondary">
+                <h2 class="my-0 text-white">Register New Account</h2>
             </div>
-            <div class="card-body">
+            <div class="card-body bg-dark text-white">
                 <p class="text-muted mb-4">Create your customer account to rent equipment and manage your orders.</p>
                 
-                <!-- Debug info to help troubleshoot -->
-                <div class="alert alert-info">
-                    <p>Debug - Form fields available: {{ form_fields|join:", " }}</p>
-                </div>
-                
-                <form method="post">
+                <form method="post" novalidate>
                     {% csrf_token %}
-                    <!-- Try rendering the entire form at once instead of field by field -->
-                    {{ form|crispy }}
-                    <button type="submit" class="btn btn-primary w-100 mt-3">Register</button>
+                    
+                    <div class="mb-4">
+                        {{ form.username|as_crispy_field }}
+                    </div>
+                    
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.first_name|as_crispy_field }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.last_name|as_crispy_field }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.email|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.password1|as_crispy_field }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.password2|as_crispy_field }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.phone_number|as_crispy_field }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h5 class="border-bottom border-secondary pb-2 mb-3">Contact Information (Optional)</h5>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.address|as_crispy_field }}
+                                </div>
+                                <div class="mb-3">
+                                    {{ form.city|as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.state|as_crispy_field }}
+                                </div>
+                                <div class="mb-3">
+                                    {{ form.zip_code|as_crispy_field }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-check mt-4 p-4" style="border: 1px solid rgba(255, 206, 84, 0.2); border-radius: 4px; background-color: rgba(255, 206, 84, 0.05);">
+                        {{ form.agree_to_terms }}
+                        <label class="form-check-label" for="id_agree_to_terms" style="color: #F0E6D2; font-weight: 500; cursor: pointer; padding-left: 5px;">
+                            I agree to the Terms and Conditions
+                        </label>
+                        <div class="mt-2">
+                            <small class="text-muted">
+                                By checking this box, you agree to our <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal" style="color: #FFCE54; text-decoration: none;">Terms and Conditions</a>
+                            </small>
+                        </div>
+                        {% if form.agree_to_terms.errors %}
+                        <div class="invalid-feedback d-block">{{ form.agree_to_terms.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 mt-4">Register</button>
                 </form>
                 <div class="mt-3 text-center">
-                    <p>Already have an account? <a href="{% url 'users:login' %}">Log In</a></p>
+                    <p class="text-muted">Already have an account? <a href="{% url 'users:login' %}" class="text-primary">Log In</a></p>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Terms and Conditions Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark">
+            <div class="modal-header">
+                <h5 class="modal-title" id="termsModalLabel">ROKNSOUND Terms and Conditions</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card mb-3 bg-dark border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h5>1. Rental Agreement</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>By renting equipment from ROKNSOUND, you agree to:</p>
+                        <ul>
+                            <li>Return all equipment in the same condition as received, minus normal wear and tear</li>
+                            <li>Pay for any damages beyond normal wear and tear</li>
+                            <li>Return equipment by the agreed-upon date</li>
+                            <li>Pay all rental fees and security deposits as specified in your rental agreement</li>
+                            <li>Provide valid identification at time of rental pickup</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card mb-3 bg-dark border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h5>2. Security Deposits</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>All rentals require a security deposit based on the value of the equipment. The deposit will be:</p>
+                        <ul>
+                            <li>Fully refunded upon return of equipment in satisfactory condition</li>
+                            <li>Partially refunded if equipment requires minor repairs</li>
+                            <li>Forfeited if equipment is damaged beyond repair, lost, or stolen</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card mb-3 bg-dark border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h5>3. Late Returns</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Equipment returned after the due date will incur additional charges:</p>
+                        <ul>
+                            <li>Late fees are calculated at the daily rental rate plus 25%</li>
+                            <li>Equipment more than 7 days late may be reported as stolen</li>
+                            <li>No refunds for early returns</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card mb-3 bg-dark border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h5>4. Liability</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>You are responsible for the equipment while in your possession and agree to:</p>
+                        <ul>
+                            <li>Use equipment safely and appropriately</li>
+                            <li>Follow all manufacturer instructions</li>
+                            <li>Not modify or alter the equipment</li>
+                            <li>Assume all liability for injury or damages caused by the equipment</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card mb-3 bg-dark border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h5>5. Payment Terms</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>All rentals must be paid in full at time of pickup. We accept:</p>
+                        <ul>
+                            <li>Credit cards (Visa, MasterCard, American Express)</li>
+                            <li>Venmo</li>
+                            <li>PayPal</li>
+                            <li>Cash (in person only)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-warning" data-bs-dismiss="modal">I Understand</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Form styling based on ROKNSOUND design guidelines */
+.form-control {
+    background-color: #1E1E1E !important;
+    color: #F0E6D2 !important;
+    border-radius: 4px !important;
+    border: 1px solid #3A3A3A !important;
+    padding: 0.75rem 1rem !important;
+}
+
+.form-control:focus {
+    background-color: #2E2E2E !important;
+    border-color: #FFCE54 !important;
+    box-shadow: 0 0 0 0.2rem rgba(255, 206, 84, 0.25) !important;
+}
+
+/* Style form labels */
+label {
+    color: #F0E6D2 !important;
+    font-weight: 500 !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* Style help text */
+.help-text, .form-text {
+    color: #8A8A8A !important;
+    font-size: 0.875rem !important;
+    margin-top: 0.25rem !important;
+}
+
+/* Style for checkbox when checked */
+.form-check-input:checked {
+    background-color: #FFCE54 !important;
+    border-color: #FFCE54 !important;
+}
+
+.form-check-input:focus {
+    border-color: #FFCE54 !important;
+    box-shadow: 0 0 0 0.2rem rgba(255, 206, 84, 0.25) !important;
+}
+
+/* Card styling */
+.card {
+    background-color: #121212 !important;
+    border: none !important;
+}
+
+.card-header {
+    border-bottom: 1px solid #3A3A3A !important;
+}
+
+/* Button styling */
+.btn-primary {
+    background-color: #FFCE54 !important;
+    border-color: #FFCE54 !important;
+    color: #121212 !important;
+    font-weight: 600 !important;
+    padding: 0.75rem 1.5rem !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+.btn-primary:hover {
+    background-color: #FFD76B !important;
+    border-color: #FFD76B !important;
+}
+
+/* Add spacing between form sections */
+.form-group {
+    margin-bottom: 1.5rem !important;
+}
+
+/* Style validation messages */
+.invalid-feedback {
+    color: #FF6B6B !important;
+    display: block !important;
+    margin-top: 0.25rem !important;
+}
+
+/* Style required field indicators */
+.asteriskField {
+    color: #FF6B6B !important;
+    margin-left: 0.25rem !important;
+}
+</style>
 {% endblock %}

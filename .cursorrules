@@ -1,0 +1,42 @@
+# Cursor Rules for Musical Rental Inventory Project
+
+# Python Environment Management
+- Always source the virtual environment before installing packages:
+  ```bash
+  source venv/bin/activate
+  ```
+- Never install pip packages globally or without activating venv first
+- Add new dependencies to requirements.txt after installing
+
+# Make Commands
+- Use Make commands for common development tasks
+- Add new targets to Makefile for repeatable operations
+- Common targets should include:
+  - `make install` - Install dependencies
+  - `make migrate` - Run database migrations
+  - `make test` - Run test suite
+  - `make lint` - Run linting
+- When adding new development workflows, create corresponding Make targets
+
+# Testing Requirements
+- All model changes MUST have accompanying unit tests
+- Unit tests should cover:
+  - Model creation with valid data
+  - String representation (__str__ method)
+  - Model-specific methods and properties
+  - Validation rules and constraints
+  - Relationships with other models
+  - Field constraints and validations
+- Place model tests in tests/unit/test_models.py
+- Run tests before committing changes: `make test-unit`
+
+# Best Practices
+- Document new Make targets in README.md
+- Keep Makefile targets focused and composable
+- Use .env for environment variables, never hardcode
+- Run tests before committing changes
+- Follow Django's model best practices:
+  - Add docstrings to models and methods
+  - Use appropriate field types
+  - Implement proper validation
+  - Define clear relationships 

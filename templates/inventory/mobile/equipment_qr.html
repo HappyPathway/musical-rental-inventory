@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}QR Code for {{ equipment.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2 mobile-equipment-detail">
+    <div class="row mb-3">
+        <div class="col-12">
+            <h1>QR Code</h1>
+            <p class="lead">{{ equipment.name }}</p>
+        </div>
+    </div>
+    
+    <div class="card bg-dark mb-4">
+        <div class="card-body text-center">
+            <img src="data:image/png;base64,{{ qr_code_base64 }}" class="img-fluid mb-3 qr-code" alt="QR Code">
+            
+            <p>Scan this QR code to view equipment details.</p>
+            
+            <div class="d-grid gap-2">
+                <a href="{% url 'inventory:equipment_detail' equipment.pk %}" class="btn btn-secondary">Back to Equipment</a>
+                <a href="data:image/png;base64,{{ qr_code_base64 }}" download="{{ equipment.name|slugify }}-qr.png" class="btn btn-primary">Download QR Code</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

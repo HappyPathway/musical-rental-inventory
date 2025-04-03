@@ -1,0 +1,50 @@
+[
+  {
+    "model": "inventory.category",
+    "pk": 1,
+    "fields": {
+      "name": "Guitars",
+      "description": "Electric and acoustic guitars"
+    }
+  },
+  {
+    "model": "inventory.category",
+    "pk": 2,
+    "fields": {
+      "name": "Amplifiers",
+      "description": "Guitar and bass amplifiers"
+    }
+  },
+  {
+    "model": "inventory.category",
+    "pk": 3,
+    "fields": {
+      "name": "Drums",
+      "description": "Drum kits and percussion"
+    }
+  },
+  {
+    "model": "inventory.category",
+    "pk": 4,
+    "fields": {
+      "name": "Keyboards",
+      "description": "Keyboards, pianos and synths"
+    }
+  },
+  {
+    "model": "inventory.category",
+    "pk": 5,
+    "fields": {
+      "name": "PA Systems",
+      "description": "Speakers, mixers and PA equipment"
+    }
+  },
+  {
+    "model": "inventory.category",
+    "pk": 6,
+    "fields": {
+      "name": "Microphones",
+      "description": "Studio and live microphones"
+    }
+  }
+]
