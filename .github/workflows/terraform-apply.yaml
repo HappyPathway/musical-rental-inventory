@@ -43,7 +43,7 @@ jobs:
       - name: Terraform Init
         id: init
         # Explicitly pass GCS backend config
-        run: terraform init -backend-config="bucket=hpw-terraform-state" -backend-config="prefix=music-rental-inventory"
+        run: terraform init 
 
       - name: Terraform Validate
         id: validate
