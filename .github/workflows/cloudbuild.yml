@@ -37,7 +37,12 @@ jobs:
 
     - name: Test raw gsutil access
       run: gsutil cp cloudbuild.yaml gs://${{ steps.tf-output.outputs.bucket_name }}/tmp/test-upload.yaml
- 
+
+    - name: Enable verbose gcloud logs
+      run: |
+        gcloud config set verbosity debug
+        gcloud info
+
     - name: Trigger Cloud Build
       run: |
         gcloud builds submit --config=cloudbuild.yaml \
