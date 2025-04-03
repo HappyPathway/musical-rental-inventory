@@ -27,16 +27,20 @@ jobs:
       uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: 1.9.1
-        
+
     - name: Get Terraform Output
       id: tf-output
       working-directory: ./backend-state
       run: |
         terraform init
         echo "bucket_name=$(terraform output -raw bucket_name)" >> $GITHUB_OUTPUT
+        echo "logging_bucket_name=$(terraform output -raw logging_bucket_name)" >> $GITHUB_OUTPUT
 
     - name: Trigger Cloud Build
       run: |
-        gcloud builds submit --config=cloudbuild.yaml \
-        --gcs-source-staging-dir=gs://${{ steps.tf-output.outputs.bucket_name }}/tmp \
-        --config=cloudbuild.yaml
+        gcloud builds submit \
+          --config=cloudbuild.yaml \
+          --gcs-source-staging-dir=gs://${{ steps.tf-output.outputs.bucket_name }}/tmp \
+          --gcs-log-dir=gs://${{ steps.tf-output.outputs.logging_bucket_name }}/logs \
+          --service-account=terraformer@happypathway-1522441039906.iam.gserviceaccount.com
+    

@@ -13,6 +13,7 @@ provider "google" {
 
 # GCS bucket for storing the main infrastructure's Terraform state
 resource "google_storage_bucket" "terraform_state" {
+  for_each = toset([var.state_bucket_name, "${var.state_bucket_name}-logs"])
   name          = var.state_bucket_name
   location      = var.location
   storage_class = "STANDARD"
@@ -36,7 +37,7 @@ resource "local_file" "infra_backend_config" {
   content  = <<-EOT
 terraform {
   backend "gcs" {
-    bucket  = "${google_storage_bucket.terraform_state.name}"
+    bucket  = "${lookup(google_storage_bucket.terraform_state, var.state_bucket_name).name}"
     prefix  = "terraform/infra"
   }
 }
