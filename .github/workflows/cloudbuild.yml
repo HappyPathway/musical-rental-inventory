@@ -19,6 +19,10 @@ jobs:
       with:
         credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
         create_credentials_file: true
+        
+    - name: 'Set up Cloud SDK'
+      uses: 'google-github-actions/setup-gcloud@v1'
+
     
     - name: Trigger Cloud Build
       run: |

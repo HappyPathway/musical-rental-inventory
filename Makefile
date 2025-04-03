@@ -404,8 +404,5 @@ infra-apply:
 cloud-build:
 	@echo "Triggering Cloud Build to build and deploy..."
 	cd $(PWD) && \
-	gcloud builds submit \
-		--config=cloudbuild.yaml \
-		--substitutions=_GS_BUCKET_NAME=$(GS_BUCKET_NAME),_REGION=$(GCP_REGION) \
-		--project=$(GCP_PROJECT_ID)
+	gcloud builds submit --config=cloudbuild.yaml
 	@echo "Cloud Build triggered. Check the GCP console for build progress."

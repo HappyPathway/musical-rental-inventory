@@ -23,6 +23,10 @@ jobs:
         credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
         create_credentials_file: true
         
+    - name: 'Set up Cloud SDK'
+      uses: 'google-github-actions/setup-gcloud@v1'
+
+    # Simply trigger Cloud Build without custom substitutions for now
     - name: Run migrations-only build
       run: |
-        gcloud builds submit --config=cloudbuild.yaml --substitutions=_MIGRATIONS_ONLY=1
+        gcloud builds submit --config=cloudbuild.yaml
