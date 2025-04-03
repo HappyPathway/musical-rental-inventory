@@ -393,16 +393,60 @@ test-e2e-payments:
 test-all: test-unit test-integration test-e2e
 	@echo "All tests complete (including E2E tests)"
 
-infra-apply:
-	cd infra && \
-	export TF_VAR_github_token=$$(gh auth token) && \
-	terraform init && \
-	terraform plan && \
-	terraform apply -auto-approve
-
-# Google Cloud Build Target
+# Consolidated Cloud Build target with proper permissions
 cloud-build:
-	@echo "Triggering Cloud Build to build and deploy..."
-	cd $(PWD) && \
-	gcloud builds submit --config=cloudbuild.yaml
+	@echo "Setting up permissions and triggering Cloud Build..."
+	source venv/bin/activate && gcloud config set project $(GCP_PROJECT_ID)
+	source venv/bin/activate && gcloud services enable cloudbuild.googleapis.com
+	source venv/bin/activate && gcloud projects add-iam-policy-binding $(GCP_PROJECT_ID) \
+		--member=user:dave@roknsound.com \
+		--role=roles/cloudbuild.builds.editor
+	source venv/bin/activate && gcloud projects add-iam-policy-binding $(GCP_PROJECT_ID) \
+		--member=serviceAccount:$(shell source venv/bin/activate && gcloud projects describe $(GCP_PROJECT_ID) --format="value(projectNumber)")@cloudbuild.gserviceaccount.com \
+		--role=roles/cloudbuild.builds.builder
+	source venv/bin/activate && gcloud projects add-iam-policy-binding $(GCP_PROJECT_ID) \
+		--member=serviceAccount:$(shell source venv/bin/activate && gcloud projects describe $(GCP_PROJECT_ID) --format="value(projectNumber)")@cloudbuild.gserviceaccount.com \
+		--role=roles/run.admin
+	source venv/bin/activate && gcloud projects add-iam-policy-binding $(GCP_PROJECT_ID) \
+		--member=serviceAccount:$(shell source venv/bin/activate && gcloud projects describe $(GCP_PROJECT_ID) --format="value(projectNumber)")@cloudbuild.gserviceaccount.com \
+		--role=roles/iam.serviceAccountUser
+	source venv/bin/activate && gcloud projects add-iam-policy-binding $(GCP_PROJECT_ID) \
+		--member=serviceAccount:$(shell source venv/bin/activate && gcloud projects describe $(GCP_PROJECT_ID) --format="value(projectNumber)")@cloudbuild.gserviceaccount.com \
+		--role=roles/artifactregistry.admin
+	source venv/bin/activate && cd $(PWD) && gcloud builds submit --config=cloudbuild.yaml
 	@echo "Cloud Build triggered. Check the GCP console for build progress."
+
+
+# Fix Cloud Build permissions with service account setup
+fix-cloudbuild:
+	@echo "Setting up Cloud Build permissions..."
+	source venv/bin/activate && gcloud services enable cloudbuild.googleapis.com artifactregistry.googleapis.com run.googleapis.com iam.googleapis.com storage.googleapis.com serviceusage.googleapis.com
+	@echo "Getting project number and setting up variables..."
+	source venv/bin/activate && \
+		PROJ_NUM=$$(gcloud projects describe $(GCP_PROJECT_ID) --format="value(projectNumber)") && \
+		echo "Granting permissions to user and Cloud Build service account..." && \
+		gcloud projects add-iam-policy-binding $(GCP_PROJECT_ID) --member=user:dave@roknsound.com --role=roles/cloudbuild.builds.editor && \
+		gcloud projects add-iam-policy-binding $(GCP_PROJECT_ID) --member=user:dave@roknsound.com --role=roles/storage.admin && \
+		gcloud projects add-iam-policy-binding $(GCP_PROJECT_ID) --member=user:dave@roknsound.com --role=roles/iam.serviceAccountTokenCreator && \
+		gcloud projects add-iam-policy-binding $(GCP_PROJECT_ID) --member=serviceAccount:$$PROJ_NUM@cloudbuild.gserviceaccount.com --role=roles/cloudbuild.builds.builder && \
+		gcloud projects add-iam-policy-binding $(GCP_PROJECT_ID) --member=serviceAccount:$$PROJ_NUM@cloudbuild.gserviceaccount.com --role=roles/run.admin && \
+		gcloud projects add-iam-policy-binding $(GCP_PROJECT_ID) --member=serviceAccount:$$PROJ_NUM@cloudbuild.gserviceaccount.com --role=roles/iam.serviceAccountUser && \
+		gcloud projects add-iam-policy-binding $(GCP_PROJECT_ID) --member=serviceAccount:$$PROJ_NUM@cloudbuild.gserviceaccount.com --role=roles/artifactregistry.admin && \
+		gcloud projects add-iam-policy-binding $(GCP_PROJECT_ID) --member=serviceAccount:$$PROJ_NUM@cloudbuild.gserviceaccount.com --role=roles/storage.admin
+	@echo "Making sure Cloud Build bucket exists and has correct permissions..."
+	source venv/bin/activate && \
+		gsutil mb -p $(GCP_PROJECT_ID) -l us-central1 gs://$(GCP_PROJECT_ID)_cloudbuild || echo "Bucket already exists" && \
+		gsutil iam ch user:dave@roknsound.com:objectAdmin gs://$(GCP_PROJECT_ID)_cloudbuild
+	@echo "Cloud Build permissions fixed. Now run 'make run-cloudbuild' to build and deploy."
+
+# Simple Cloud Build trigger using impersonation
+run-cloudbuild:
+	@echo "Ensuring correct project: $(GCP_PROJECT_ID)"
+	source venv/bin/activate && gcloud config set project $(GCP_PROJECT_ID)
+	@echo "Refreshing application-default credentials..."
+	source venv/bin/activate && gcloud auth application-default login
+	@echo "Triggering Cloud Build for project $(GCP_PROJECT_ID)..."
+	source venv/bin/activate && \
+		PROJ_NUM=$$(gcloud projects describe $(GCP_PROJECT_ID) --format="value(projectNumber)") && \
+		gcloud builds submit --config=cloudbuild.yaml --impersonate-service-account=$$PROJ_NUM@cloudbuild.gserviceaccount.com
+	@echo "Cloud Build submitted."

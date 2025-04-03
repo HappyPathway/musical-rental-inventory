@@ -1,18 +1,18 @@
 steps:
   # Build the container image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'us-central1-docker.pkg.dev/${PROJECT_ID}/roknsound-images/roknsound-rental-inventory:$COMMIT_SHA', '.']
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/${PROJECT_ID}/roknsound-images/roknsound-rental-inventory:${COMMIT_SHA}', '.']
 
   # Build the migrations image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'us-central1-docker.pkg.dev/${PROJECT_ID}/roknsound-images/roknsound-rental-inventory:migrate-$COMMIT_SHA', '--build-arg', 'MIGRATIONS_ONLY=1', '.']
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/${PROJECT_ID}/roknsound-images/roknsound-rental-inventory:migrate-${COMMIT_SHA}', '--build-arg', 'MIGRATIONS_ONLY=1', '.']
 
   # Push the container images to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'us-central1-docker.pkg.dev/${PROJECT_ID}/roknsound-images/roknsound-rental-inventory:$COMMIT_SHA']
+    args: ['push', 'us-central1-docker.pkg.dev/${PROJECT_ID}/roknsound-images/roknsound-rental-inventory:${COMMIT_SHA}']
   
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'us-central1-docker.pkg.dev/${PROJECT_ID}/roknsound-images/roknsound-rental-inventory:migrate-$COMMIT_SHA']
+    args: ['push', 'us-central1-docker.pkg.dev/${PROJECT_ID}/roknsound-images/roknsound-rental-inventory:migrate-${COMMIT_SHA}']
 
   # Run migrations (create or update job)
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -22,12 +22,12 @@ steps:
       - |
         gcloud run jobs describe roknsound-migrations --region=us-central1 >/dev/null 2>&1 \
         && gcloud run jobs update roknsound-migrations \
-          --image=us-central1-docker.pkg.dev/${PROJECT_ID}/roknsound-images/roknsound-rental-inventory:migrate-$COMMIT_SHA \
+          --image=us-central1-docker.pkg.dev/${PROJECT_ID}/roknsound-images/roknsound-rental-inventory:migrate-${COMMIT_SHA} \
           --region=us-central1 \
           --service-account=roknsound-storage-sa@${PROJECT_ID}.iam.gserviceaccount.com \
           --set-env-vars=GS_BUCKET_NAME=roknsound-music-rental-inventory,GS_PROJECT_ID=${PROJECT_ID},DEBUG=0,MIGRATE_ONLY=1 \
         || gcloud run jobs create roknsound-migrations \
-          --image=us-central1-docker.pkg.dev/${PROJECT_ID}/roknsound-images/roknsound-rental-inventory:migrate-$COMMIT_SHA \
+          --image=us-central1-docker.pkg.dev/${PROJECT_ID}/roknsound-images/roknsound-rental-inventory:migrate-${COMMIT_SHA} \
           --region=us-central1 \
           --service-account=roknsound-storage-sa@${PROJECT_ID}.iam.gserviceaccount.com \
           --set-env-vars=GS_BUCKET_NAME=roknsound-music-rental-inventory,GS_PROJECT_ID=${PROJECT_ID},DEBUG=0,MIGRATE_ONLY=1
@@ -50,7 +50,7 @@ steps:
       - 'run'
       - 'deploy'
       - 'roknsound-rental-inventory'
-      - '--image=us-central1-docker.pkg.dev/${PROJECT_ID}/roknsound-images/roknsound-rental-inventory:$COMMIT_SHA'
+      - '--image=us-central1-docker.pkg.dev/${PROJECT_ID}/roknsound-images/roknsound-rental-inventory:${COMMIT_SHA}'
       - '--region=us-central1'
       - '--platform=managed'
       - '--allow-unauthenticated'
@@ -59,8 +59,8 @@ steps:
 
 # Store images in Artifact Registry
 images:
-  - 'us-central1-docker.pkg.dev/${PROJECT_ID}/roknsound-images/roknsound-rental-inventory:$COMMIT_SHA'
-  - 'us-central1-docker.pkg.dev/${PROJECT_ID}/roknsound-images/roknsound-rental-inventory:migrate-$COMMIT_SHA'
+  - 'us-central1-docker.pkg.dev/${PROJECT_ID}/roknsound-images/roknsound-rental-inventory:${COMMIT_SHA}'
+  - 'us-central1-docker.pkg.dev/${PROJECT_ID}/roknsound-images/roknsound-rental-inventory:migrate-${COMMIT_SHA}'
 
 # Faster builds with concurrent storage operations
 options:
