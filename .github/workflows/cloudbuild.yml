@@ -35,6 +35,9 @@ jobs:
         terraform init
         echo "bucket_name=$(terraform output -raw bucket_name)" >> $GITHUB_OUTPUT
 
+    - name: Test raw gsutil access
+      run: gsutil cp cloudbuild.yaml gs://${{ steps.tf-output.outputs.bucket_name }}/tmp/test-upload.yaml
+ 
     - name: Trigger Cloud Build
       run: |
         gcloud builds submit --config=cloudbuild.yaml \
