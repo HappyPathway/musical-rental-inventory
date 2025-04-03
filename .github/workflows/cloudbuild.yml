@@ -51,4 +51,5 @@ jobs:
         gcloud builds submit --config=cloudbuild.yaml \
         --gcs-source-staging-dir=gs://${{ steps.tf-output.outputs.bucket_name }}/tmp \
         --service-account=terraformer@happypathway-1522441039906.iam.gserviceaccount.com \
+        --logging=LOGGING_ONLY \
         --config=cloudbuild.yaml
