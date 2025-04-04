@@ -26,11 +26,15 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project
+# Copy project (excluding unnecessary files)
 COPY . .
 
-# # Copy service account key
-# COPY gcp-service-account-key.json /app/gcp-service-account-key.json
+# Remove QR code files and other unnecessary files to reduce image size
+RUN find . -path "*/generated_qrcodes/*" -type f -delete && \
+    find . -path "*/test-screenshots/*" -type f -delete && \
+    find . -path "*/pyc/*" -type f -delete && \
+    find . -name "*.pyc" -delete && \
+    find . -name "__pycache__" -type d -exec rm -rf {} +
 
 # Collect static files
 RUN python manage.py collectstatic --noinput
@@ -44,7 +48,7 @@ if [ "$MIGRATIONS_ONLY" = "1" ] || [ "$MIGRATE_ONLY" = "1" ]; then\n\
 else\n\
   # Run migrations and start the server\n\
   python manage.py migrate --noinput\n\
-  gunicorn --bind :$PORT --workers 2 --threads 8 --timeout 0 --log-level debug --error-logfile - --access-logfile - music_rental.wsgi:application\n\
+  gunicorn --bind :$PORT --workers 2 --threads 8 --timeout 0 --log-level debug music_rental.wsgi:application\n\
 fi' > /app/entrypoint.sh
 
 RUN chmod +x /app/entrypoint.sh

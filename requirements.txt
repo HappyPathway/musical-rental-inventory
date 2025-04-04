@@ -15,6 +15,7 @@ cryptography==44.0.2
 decorator==5.2.1
 defusedxml==0.7.1
 distro==1.9.0
+dj-database-url==2.1.0
 Django==4.2.11
 django-allauth==0.57.0
 django-crispy-forms==2.0

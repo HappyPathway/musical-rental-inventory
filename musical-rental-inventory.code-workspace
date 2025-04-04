@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "../Clover/template-image-pipeline"
+		},
+		{
+			"path": "../providers/terraform-provider-google"
 		}
 	],
 	"settings": {}

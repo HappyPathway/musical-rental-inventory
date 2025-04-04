@@ -1,5 +1,11 @@
 # Google Cloud SQL configuration
 
+# Generate a secure database password
+resource "random_password" "database_password" {
+  length  = 24
+  special = false
+}
+
 # Cloud SQL instance - smallest available (db-f1-micro)
 resource "google_sql_database_instance" "postgres" {
   name             = "roknsound-db-instance"
@@ -10,14 +16,22 @@ resource "google_sql_database_instance" "postgres" {
     tier              = "db-f1-micro"  # Smallest, cheapest tier
     availability_type = "ZONAL"        # Zonal for lower cost
     
-    backup_configuration {
-      enabled = true
-      start_time = "02:00"  # 2 AM UTC
-    }
-    
     ip_configuration {
       # Public IP for simplicity, but you may want to use private IP in production
       ipv4_enabled = true
+      
+      # Allow Cloud Run service to connect
+      authorized_networks {
+        name  = "all-networks"  # Allow from anywhere (Cloud Run has dynamic IPs)
+        value = "0.0.0.0/0"
+      }
+    }
+    
+    # Enable point-in-time recovery
+    backup_configuration {
+      enabled            = true
+      start_time         = "02:00"  # 2 AM UTC
+      point_in_time_recovery_enabled = true
     }
   }
   
@@ -35,5 +49,5 @@ resource "google_sql_database" "roknsound_db" {
 resource "google_sql_user" "app_user" {
   name     = "roknsound_app"
   instance = google_sql_database_instance.postgres.name
-  password = random_password.django_secret.result  # Using same password for simplicity
+  password = random_password.database_password.result  # Using separate password for database
 }

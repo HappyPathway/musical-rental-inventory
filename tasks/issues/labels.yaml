@@ -1,0 +1,40 @@
+labels:
+- name: testing
+  color: 1d76db
+  description: Testing related tasks and issues
+- name: authentication
+  color: 0e8a16
+  description: Authentication and user management
+- name: equipment
+  color: d93f0b
+  description: Equipment management and inventory
+- name: rentals
+  color: fbca04
+  description: Rental process and management
+- name: workflow
+  color: 6f42c1
+  description: Business process workflows
+- name: management
+  color: b60205
+  description: Administrative management features
+- name: ui
+  color: cc317c
+  description: User interface elements and design
+- name: mobile
+  color: 0052cc
+  description: Mobile-specific functionality and testing
+- name: reports
+  color: 006b75
+  description: Reporting and analytics features
+- name: security
+  color: ee0701
+  description: Security features and testing
+- name: search
+  color: c2e0c6
+  description: Search functionality and optimization
+- name: checkout
+  color: fef2c0
+  description: Checkout and order processing
+- name: payments
+  color: c5def5
+  description: Payment processing and management

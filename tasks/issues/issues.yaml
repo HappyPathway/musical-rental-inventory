@@ -1,0 +1,124 @@
+issues:
+- key: authentication_workflows_user_registration
+  title: '[Test] Authentication Workflows - User Registration'
+  labels:
+  - testing
+  - authentication
+- key: authentication_workflows_login_system
+  title: '[Test] Authentication Workflows - Login System'
+  labels:
+  - testing
+  - authentication
+- key: authentication_workflows_session_management
+  title: '[Test] Authentication Workflows - Session Management'
+  labels:
+  - testing
+  - authentication
+- key: equipment_management_equipment_listing
+  title: '[Test] Equipment Management - Equipment Listing'
+  labels:
+  - testing
+  - equipment
+  - ui
+- key: equipment_management_equipment_details
+  title: '[Test] Equipment Management - Equipment Details'
+  labels:
+  - testing
+  - equipment
+  - ui
+- key: equipment_management_equipment_management_staff_only
+  title: '[Test] Equipment Management - Equipment Management (Staff Only)'
+  labels:
+  - testing
+  - equipment
+  - ui
+- key: rental_management_rental_creation
+  title: '[Test] Rental Management - Rental Creation'
+  labels:
+  - testing
+  - rentals
+- key: rental_management_rental_workflow
+  title: '[Test] Rental Management - Rental Workflow'
+  labels:
+  - testing
+  - rentals
+  - workflow
+- key: rental_management_rental_management
+  title: '[Test] Rental Management - Rental Management'
+  labels:
+  - testing
+  - rentals
+- key: user_management_profile_management
+  title: '[Test] User Management - Profile Management'
+  labels:
+  - testing
+  - management
+- key: user_management_staff_management_admin_only
+  title: '[Test] User Management - Staff Management (Admin Only)'
+  labels:
+  - testing
+  - management
+- key: payment_processing_payment_workflows
+  title: '[Test] Payment Processing - Payment Workflows'
+  labels:
+  - testing
+  - payments
+  - workflow
+  - checkout
+- key: payment_processing_financial_reports
+  title: '[Test] Payment Processing - Financial Reports'
+  labels:
+  - testing
+  - payments
+  - reports
+- key: system_administration_configuration
+  title: '[Test] System Administration - Configuration'
+  labels:
+  - testing
+  - management
+- key: system_administration_maintenance
+  title: '[Test] System Administration - Maintenance'
+  labels:
+  - testing
+  - management
+- key: mobile_responsiveness_test_on_different_devices
+  title: '[Test] Mobile Responsiveness - Test on Different Devices'
+  labels:
+  - testing
+  - mobile
+- key: mobile_responsiveness_test_responsive_features
+  title: '[Test] Mobile Responsiveness - Test Responsive Features'
+  labels:
+  - testing
+  - mobile
+  - ui
+- key: error_handling_test_error_scenarios
+  title: '[Test] Error Handling - Test Error Scenarios'
+  labels:
+  - testing
+  - workflow
+- key: error_handling_verify_error_messages
+  title: '[Test] Error Handling - Verify Error Messages'
+  labels:
+  - testing
+  - workflow
+- key: performance_testing_load_testing
+  title: '[Test] Performance Testing - Load Testing'
+  labels:
+  - testing
+  - testing
+- key: performance_testing_response_times
+  title: '[Test] Performance Testing - Response Times'
+  labels:
+  - testing
+  - testing
+- key: security_testing_access_control
+  title: '[Test] Security Testing - Access Control'
+  labels:
+  - testing
+  - security
+- key: security_testing_data_protection
+  title: '[Test] Security Testing - Data Protection'
+  labels:
+  - testing
+  - security

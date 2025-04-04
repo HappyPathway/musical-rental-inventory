@@ -1,4 +1,4 @@
-.PHONY: venv install migrate run shell test clean superuser static collectstatic lint help kill reset test-selenium test-selenium-inventory test-selenium-rentals test-selenium-users test-selenium-payments infra import-fixtures docker-build docker-run docker-push gcp-auth deploy-cloud-run taint-sa-key fetch-pa-speakers load-pa-fixtures setup-pa-inventory test test-unit test-integration test-e2e test-e2e-visual test-e2e-inventory test-e2e-rentals test-e2e-users test-e2e-payments infra-apply fix-cloudbuild-sa-permissions test-cloudbuild tf-deploy
+.PHONY: venv install migrate run shell test clean superuser static collectstatic lint help kill reset test-selenium test-selenium-inventory test-selenium-rentals test-selenium-users test-selenium-payments infra import-fixtures docker-build docker-run docker-push gcp-auth deploy-cloud-run taint-sa-key fetch-pa-speakers load-pa-fixtures setup-pa-inventory test test-unit test-integration test-e2e test-e2e-visual test-e2e-inventory test-e2e-rentals test-e2e-users test-e2e-payments infra-apply fix-cloudbuild-sa-permissions test-cloudbuild tf-deploy tasks-init tasks-plan tasks-apply tasks-list import-resources import-common-resources
 
 # Include environment variables if .env exists
 -include .env
@@ -74,6 +74,7 @@ help:
 	@echo "  make backend-state-apply - Apply Terraform backend state configuration"
 	@echo "  make infra-init    - Initialize main infrastructure Terraform"
 	@echo "  make setup-backend - Set up Terraform backend in GCS"
+	@echo "  make terratest     - Run Terratest infrastructure tests"
 	@echo ""
 	@echo "Note: Always use 'make reset' after making CSS or JavaScript changes"
 	@echo "      to rebuild static files and restart the server."
@@ -189,6 +190,16 @@ infra:
 	terraform plan && \
 	terraform apply -auto-approve
 	@echo "Terraform apply complete."
+
+# Terraform Infrastructure Target
+infra-destroy:
+	@echo "Applying Terraform infrastructure changes..."
+	cd infra && \
+	terraform init && \
+	terraform validate && \
+	terraform plan && \
+	terraform destroy -auto-approve
+	@echo "Terraform destroy complete."
 
 # Import fixtures
 import-fixtures:
@@ -326,7 +337,7 @@ backend-state-apply:
 infra-init:
 	@echo "Initializing main infrastructure Terraform with GCS backend..."
 	@echo "Ensure the bucket name in infra/backend.tf matches the one created."
-	cd infra && terraform init -migrate-state
+	cd infra && terraform init -migrate-state -upgrade
 	@echo "Main infrastructure backend initialized."
 
 
@@ -381,3 +392,74 @@ test-e2e-payments:
 
 test-all: test-unit test-integration test-e2e
 	@echo "All tests complete (including E2E tests)"
+
+# Deploy using Terraform (applies all infrastructure changes and deploys app)
+tf-deploy:
+	@echo "Deploying application using Terraform..."
+	source venv/bin/activate && \
+	cd infra && \
+	terraform init && \
+	terraform apply -auto-approve
+	@echo "Terraform deployment complete!"
+	@echo "Your application is now running on: $$(cd infra && terraform output -raw cloud_run_url)"
+
+# Execute migrations on the deployed database
+run-migrations:
+	@echo "Running migrations on the deployed database..."
+	source venv/bin/activate && \
+	cd infra && \
+	export MIGRATION_JOB=$$(terraform output -raw cloud_run_url | cut -d'/' -f3 | cut -d'.' -f1)-migrations && \
+	gcloud run jobs execute $$MIGRATION_JOB --region=$$(terraform output -raw cloud_run_url | cut -d'/' -f3 | cut -d'.' -f2 | cut -d'-' -f1)
+	@echo "Migrations completed successfully!"
+
+# Full deployment (Terraform + migrations)
+deploy-full: tf-deploy run-migrations
+	@echo "Full deployment completed successfully!"
+	@echo "Your application is available at: $$(cd infra && terraform output -raw cloud_run_url)"
+
+# Task management targets
+.PHONY: tasks-init tasks-plan tasks-apply tasks-list
+
+# Initialize tasks Terraform
+tasks-init:
+	@echo "Initializing task management infrastructure..."
+	source venv/bin/activate && cd tasks && terraform init
+
+# Plan task changes
+tasks-plan:
+	@echo "Planning task management changes..."
+	source venv/bin/activate && cd tasks && terraform plan
+
+# Apply task changes
+tasks-apply:
+	@echo "Applying task management changes..."
+	source venv/bin/activate && cd tasks && terraform apply -auto-approve
+	@echo "Tasks have been managed successfully!"
+
+# List all current tasks/issues
+tasks-list:
+	@echo "Listing current tasks from GitHub..."
+	source venv/bin/activate && cd tasks && \
+	  terraform output -json github_issues | jq -r '.[] | "- #\(.number): \(.title) (\(.state))"'
+
+# Import common resources that might already exist in GCP
+import-common-resources:
+	@echo "Importing common GCP resources that frequently need importing..."
+	source venv/bin/activate && cd infra && terraform init
+	@echo "Trying to import service account..."
+	cd infra && terraform import google_service_account.app_service_account projects/$(GCP_PROJECT_ID)/serviceAccounts/roknsound-storage-sa@$(GCP_PROJECT_ID).iam.gserviceaccount.com || echo "Service account import failed or already exists in state"
+	@echo "Trying to import storage bucket..."
+	cd infra && terraform import google_storage_bucket.media_bucket roknsound-music-rental-inventory || echo "Storage bucket import failed or already exists in state"
+	@echo "Import process completed."
+
+# Run Terratest infrastructure tests
+terratest:
+	@echo "Running Terratest infrastructure tests..."
+	source venv/bin/activate && cd infra/test && go test -v
+	@echo "Terratest infrastructure validation complete."
+
+# Fix deletion protection for Cloud Run job
+fix-deletion-protection:
+	@echo "Applying deletion_protection=false to Cloud Run job..."
+	source venv/bin/activate && cd infra && terraform apply -auto-approve -target=google_cloud_run_v2_job.migrations
+	@echo "Now you can run 'make infra-destroy' to destroy the infrastructure."

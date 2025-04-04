@@ -6,13 +6,11 @@ resource "google_storage_bucket" "media_bucket" {
 
   uniform_bucket_level_access = true
 
-  lifecycle_rule {
-    condition {
-      age = 30 # days
-    }
-    action {
-      type = "Delete"
-    }
+  cors {
+    origin          = ["*"]
+    method          = ["GET", "HEAD", "PUT", "POST", "DELETE"]
+    response_header = ["*"]
+    max_age_seconds = 3600
   }
 }
 
@@ -20,8 +18,10 @@ resource "google_storage_bucket" "media_bucket" {
 
 
 # Grant the service account access to the bucket
-resource "google_storage_bucket_iam_member" "bucket_access" {
+resource "google_storage_bucket_iam_binding" "bucket_access" {
   bucket = google_storage_bucket.media_bucket.name
-  role   = "roles/storage.objectViewer"
-  member = "serviceAccount:${google_service_account.app_service_account.email}"
+  role   = "roles/storage.objectAdmin"
+  members = [
+    "serviceAccount:${google_service_account.app_service_account.email}"
+  ]
 }

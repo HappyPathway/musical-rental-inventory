@@ -21,3 +21,33 @@ resource "google_project_iam_member" "cloud_sql_client" {
   role    = "roles/cloudsql.client"
   member  = "serviceAccount:${google_service_account.app_service_account.email}"
 }
+
+# Storage Object Admin permission for accessing the GCS bucket
+resource "google_project_iam_member" "storage_object_admin" {
+  project = var.project_id
+  role    = "roles/storage.objectAdmin"
+  member  = "serviceAccount:${google_service_account.app_service_account.email}"
+}
+
+# Storage Admin permission for managing the GCS bucket
+resource "google_project_iam_member" "storage_admin" {
+  project = var.project_id
+  role    = "roles/storage.admin"
+  member  = "serviceAccount:${google_service_account.app_service_account.email}"
+}
+
+# Cloud Run Admin permission for deploying to Cloud Run
+resource "google_project_iam_member" "run_admin" {
+  project = var.project_id
+  role    = "roles/run.admin"
+  member  = "serviceAccount:${google_service_account.app_service_account.email}"
+}
+
+# IAM permission for the service account to act as itself
+resource "google_service_account_iam_binding" "app_service_account_user" {
+  service_account_id = google_service_account.app_service_account.name
+  role               = "roles/iam.serviceAccountUser"
+  members            = [
+    "serviceAccount:${google_service_account.app_service_account.email}",
+  ]
+}
