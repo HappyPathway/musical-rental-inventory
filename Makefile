@@ -182,6 +182,18 @@ test-selenium-visual:
 	$(VENV_ACTIVATE) && ./run_selenium_tests.py
 
 # Terraform Infrastructure Target
+
+infra-init:
+	@echo "Initializing main infrastructure Terraform with GCS backend..."
+	@echo "Ensure the bucket name in infra/backend.tf matches the one created."
+	cd infra && terraform init -migrate-state -upgrade
+	@echo "Main infrastructure backend initialized."
+
+infra-apply:
+	@echo "Applying main infrastructure Terraform configuration..."
+	cd infra && terraform apply -auto-approve
+	@echo "Main infrastructure applied successfully."
+
 infra:
 	@echo "Applying Terraform infrastructure changes..."
 	cd infra && \
@@ -261,16 +273,23 @@ docker-stop:
 		echo "No running container found using port 8080."; \
 	fi
 	
+docker-tag:
+	@echo "Tagging Docker image for GCP Artifact Registry..."
+	docker tag $(IMAGE_NAME):$(IMAGE_TAG) $(FULL_IMAGE_NAME)
+
+docker-push: create-ar-repo docker-tag
+	@echo "Pushing Docker image to GCP Artifact Registry..."
+	@echo "Authenticating with Google Container Registry..."
+	gcloud auth configure-docker $(GCP_REGION)-docker.pkg.dev --quiet
+	docker push $(FULL_IMAGE_NAME)
+
+
 # GCP Auth and Deployment Targets
 gcp-auth:
 	@echo "Authenticating with Google Cloud..."
 	gcloud auth login
 	gcloud config set project $(GCP_PROJECT_ID)
 	gcloud auth configure-docker $(GCP_REGION)-docker.pkg.dev
-
-docker-tag:
-	@echo "Tagging Docker image for GCP Artifact Registry..."
-	docker tag $(IMAGE_NAME):$(IMAGE_TAG) $(FULL_IMAGE_NAME)
 
 create-ar-repo:
 	@echo "Creating Google Artifact Registry repository if it doesn't exist..."
@@ -283,12 +302,6 @@ create-ar-repo:
 		--repository-format=docker \
 		--description="Docker repository for ROKNSOUND images"
 	@echo "Repository roknsound-images is ready."
-
-docker-push: create-ar-repo docker-tag
-	@echo "Pushing Docker image to GCP Artifact Registry..."
-	@echo "Authenticating with Google Container Registry..."
-	gcloud auth configure-docker $(GCP_REGION)-docker.pkg.dev --quiet
-	docker push $(FULL_IMAGE_NAME)
 
 # Django database migration targets
 django-migrate-prod:
@@ -333,18 +346,6 @@ backend-state-apply:
 	@echo "Applying Terraform configuration to create the state bucket..."
 	cd backend-state && terraform apply -auto-approve
 	@echo "Terraform state bucket setup complete."
-
-infra-init:
-	@echo "Initializing main infrastructure Terraform with GCS backend..."
-	@echo "Ensure the bucket name in infra/backend.tf matches the one created."
-	cd infra && terraform init -migrate-state -upgrade
-	@echo "Main infrastructure backend initialized."
-
-
-infra-apply:
-	@echo "Applying main infrastructure Terraform configuration..."
-	cd infra && terraform apply -auto-approve
-	@echo "Main infrastructure applied successfully."
 	
 setup-backend: backend-state-init backend-state-apply infra-init
 	@echo "Terraform backend setup complete. State is now managed in GCS."
@@ -393,15 +394,6 @@ test-e2e-payments:
 test-all: test-unit test-integration test-e2e
 	@echo "All tests complete (including E2E tests)"
 
-# Deploy using Terraform (applies all infrastructure changes and deploys app)
-tf-deploy:
-	@echo "Deploying application using Terraform..."
-	source venv/bin/activate && \
-	cd infra && \
-	terraform init && \
-	terraform apply -auto-approve
-	@echo "Terraform deployment complete!"
-	@echo "Your application is now running on: $$(cd infra && terraform output -raw cloud_run_url)"
 
 # Execute migrations on the deployed database
 run-migrations:
@@ -413,7 +405,7 @@ run-migrations:
 	@echo "Migrations completed successfully!"
 
 # Full deployment (Terraform + migrations)
-deploy-full: tf-deploy run-migrations
+deploy-full: infra run-migrations
 	@echo "Full deployment completed successfully!"
 	@echo "Your application is available at: $$(cd infra && terraform output -raw cloud_run_url)"
 
@@ -457,9 +449,3 @@ terratest:
 	@echo "Running Terratest infrastructure tests..."
 	source venv/bin/activate && cd infra/test && go test -v
 	@echo "Terratest infrastructure validation complete."
-
-# Fix deletion protection for Cloud Run job
-fix-deletion-protection:
-	@echo "Applying deletion_protection=false to Cloud Run job..."
-	source venv/bin/activate && cd infra && terraform apply -auto-approve -target=google_cloud_run_v2_job.migrations
-	@echo "Now you can run 'make infra-destroy' to destroy the infrastructure."
