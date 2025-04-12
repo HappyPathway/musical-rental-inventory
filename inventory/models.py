@@ -45,6 +45,7 @@ class Equipment(models.Model):
     rental_price_weekly = models.DecimalField(max_digits=8, decimal_places=2)
     rental_price_monthly = models.DecimalField(max_digits=8, decimal_places=2)
     deposit_amount = models.DecimalField(max_digits=8, decimal_places=2)
+    replacement_value = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='available')
     condition = models.TextField(blank=True)
     notes = models.TextField(blank=True)

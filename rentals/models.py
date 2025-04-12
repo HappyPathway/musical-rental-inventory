@@ -5,6 +5,9 @@ from django.utils import timezone
 from phonenumber_field.modelfields import PhoneNumberField
 from simple_history.models import HistoricalRecords
 from inventory.models import Equipment
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.contrib.auth.models import User
 import uuid
 
 class Customer(models.Model):
@@ -39,6 +42,46 @@ class Customer(models.Model):
     
     def get_absolute_url(self):
         return reverse('rentals:customer_detail', args=[str(self.id)])
+
+# Signal to create Customer record when a User is created or updated
+@receiver(post_save, sender=User)
+def create_or_update_customer(sender, instance, created, **kwargs):
+    """
+    Create or update a Customer record when a User registers or is updated.
+    This links the User auth system with the Rental customer records.
+    """
+    # Only proceed if the user has a profile and is a customer type
+    if hasattr(instance, 'profile') and instance.profile.user_type == 'customer':
+        # Check if a customer record already exists for this user
+        customer, created = Customer.objects.get_or_create(
+            user=instance,
+            defaults={
+                'first_name': instance.first_name,
+                'last_name': instance.last_name,
+                'email': instance.email,
+                'phone': getattr(instance.profile, 'phone_number', ''),
+                'address': getattr(instance.profile, 'address', ''),
+                'city': getattr(instance.profile, 'city', ''),
+                'state': getattr(instance.profile, 'state', ''),
+                'zip_code': getattr(instance.profile, 'zip_code', ''),
+                'id_type': 'drivers_license',  # Default value
+                'id_number': f"USER{instance.id}",  # Default value
+            }
+        )
+        
+        # If customer exists but user info was updated, update the customer record too
+        if not created:
+            customer.first_name = instance.first_name
+            customer.last_name = instance.last_name
+            customer.email = instance.email
+            if hasattr(instance, 'profile'):
+                if hasattr(instance.profile, 'phone_number'):
+                    customer.phone = instance.profile.phone_number
+                customer.address = instance.profile.address
+                customer.city = instance.profile.city
+                customer.state = instance.profile.state
+                customer.zip_code = instance.profile.zip_code
+            customer.save()
 
 class Rental(models.Model):
     STATUS_CHOICES = (

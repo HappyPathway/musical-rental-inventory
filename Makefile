@@ -51,6 +51,11 @@ help:
 	@echo "  make test-user-management-flow - Run user management flow tests"
 	@echo "  make test-mobile   - Run mobile inventory tests"
 	@echo "  make test-selenium-visual    - Run Selenium tests with visible browser"
+	@echo "  make test-functional-auth    - Run authentication functional tests with visible browser"
+	@echo "  make test-functional-equipment - Run equipment management functional tests with visible browser"
+	@echo "  make test-functional-rentals - Run rental management functional tests with visible browser"
+	@echo "  make test-functional-payments - Run payment processing functional tests with visible browser"
+	@echo "  make test-functional-all     - Run all functional tests with visible browser"
 	@echo ""
 	@echo "Data management:"
 	@echo "  make import-fixtures - Load fixture data (usage: make import-fixtures app=myapp)"
@@ -180,6 +185,40 @@ test-mobile:
 # Visual browser tests (non-headless)
 test-selenium-visual:
 	$(VENV_ACTIVATE) && ./run_selenium_tests.py
+
+# Functional Tests with visible browser and pauses for human review
+test-functional-auth:
+	@echo "Running authentication functional tests with visible browser..."
+	$(VENV_ACTIVATE) && python -m pytest tests/functional/test_authentication.py -v
+
+test-functional-equipment:
+	@echo "Running equipment management functional tests with visible browser..."
+	$(VENV_ACTIVATE) && python -m pytest tests/functional/test_equipment.py -v
+
+test-functional-rentals:
+	@echo "Running rental management functional tests with visible browser..."
+	$(VENV_ACTIVATE) && python -m pytest tests/functional/test_rentals.py -v
+
+test-functional-payments:
+	@echo "Running payment processing functional tests with visible browser..."
+	$(VENV_ACTIVATE) && python -m pytest tests/functional/test_payments.py -v
+
+test-functional-all:
+	@echo "Running all functional tests with visible browser..."
+	$(VENV_ACTIVATE) && python -m pytest tests/functional/ -v
+
+# Additional functional tests for specific features
+test-functional-profile:
+	@echo "Running profile management functional tests with visible browser..."
+	$(VENV_ACTIVATE) && python -m pytest tests/functional/test_profile.py -v
+
+test-functional-responsive:
+	@echo "Running responsive design functional tests with visible browser..."
+	$(VENV_ACTIVATE) && python -m pytest tests/functional/test_responsive.py -v
+
+test-functional-equipment-edit:
+	@echo "Running equipment editing functional tests with visible browser..."
+	$(VENV_ACTIVATE) && python -m pytest tests/functional/test_equipment_edit.py -v
 
 # Terraform Infrastructure Target
 

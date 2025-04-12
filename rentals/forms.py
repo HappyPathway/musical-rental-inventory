@@ -23,7 +23,7 @@ class CustomerForm(forms.ModelForm):
 class RentalForm(forms.ModelForm):
     class Meta:
         model = Rental
-        fields = ['customer', 'start_date', 'end_date', 'duration_type', 'notes']
+        fields = ['start_date', 'end_date', 'duration_type', 'notes']
         widgets = {
             'start_date': forms.DateInput(attrs={'type': 'date', 'min': timezone.now().date()}),
             'end_date': forms.DateInput(attrs={'type': 'date', 'min': timezone.now().date()}),
@@ -48,6 +48,11 @@ class RentalForm(forms.ModelForm):
             instance.save()
         return instance
 
+class StaffRentalForm(RentalForm):
+    """Rental form for staff users that includes customer selection"""
+    class Meta(RentalForm.Meta):
+        fields = ['customer'] + RentalForm.Meta.fields
+
 class RentalItemForm(forms.ModelForm):
     equipment = forms.ModelChoiceField(
         queryset=Equipment.objects.filter(status='available'),
@@ -58,19 +63,10 @@ class RentalItemForm(forms.ModelForm):
         initial=1,
         widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '1'})
     )
-    price = forms.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'})
-    )
-    condition_note_checkout = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 2}),
-        required=False
-    )
     
     class Meta:
         model = RentalItem
-        fields = ['equipment', 'quantity', 'price', 'condition_note_checkout']
+        fields = ['equipment', 'quantity']
 
     def clean_quantity(self):
         quantity = self.cleaned_data.get('quantity')
@@ -90,6 +86,21 @@ class RentalItemForm(forms.ModelForm):
                 raise forms.ValidationError(f"Only {equipment.quantity_available} items available")
         
         return cleaned_data
+
+class StaffRentalItemForm(RentalItemForm):
+    """RentalItem form for staff users that includes price and condition notes"""
+    price = forms.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'})
+    )
+    condition_note_checkout = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 2}),
+        required=False
+    )
+    
+    class Meta(RentalItemForm.Meta):
+        fields = RentalItemForm.Meta.fields + ['price', 'condition_note_checkout']
 
 class EquipmentSearchForm(forms.Form):
     query = forms.CharField(required=False, widget=forms.TextInput(attrs={

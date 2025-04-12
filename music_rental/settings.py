@@ -222,3 +222,11 @@ ACCOUNT_EMAIL_VERIFICATION = 'optional'
 ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
 ACCOUNT_USERNAME_MIN_LENGTH = 4
 ACCOUNT_LOGOUT_ON_GET = True  # Don't require POST for logout
+
+# Authentication backends
+AUTHENTICATION_BACKENDS = [
+    # django-allauth authentication
+    'allauth.account.auth_backends.AuthenticationBackend',
+    # Django's default for non-allauth flows
+    'django.contrib.auth.backends.ModelBackend',
+]

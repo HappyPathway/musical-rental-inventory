@@ -13,10 +13,41 @@
     .status-overdue { color: #C23B23; }
     .status-completed { color: #5D9CEC; }
     .status-cancelled { color: #999999; }
-    
+
     .table {
         background-color: #3A3A3A;
+        border: 1px solid #C23B23;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
+
+    .card {
+        background-color: #121212;
+        border: 1px solid #FFCE54;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-header {
+        background: linear-gradient(to right, #C23B23, #FFCE54);
+        color: #F0E6D2;
+        font-weight: bold;
+    }
+
+    .btn {
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .alert {
+        background-color: #3A3A3A;
+        color: #F0E6D2;
+        border-left: 4px solid;
+    }
+    .alert-success { border-color: #48CFAD; }
+    .alert-info { border-color: #5D9CEC; }
+    .alert-warning { border-color: #FFCE54; }
+    .alert-danger { border-color: #C23B23; }
 </style>
 {% endblock %}
 

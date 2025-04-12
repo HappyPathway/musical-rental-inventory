@@ -1,0 +1,29 @@
+{% extends "rentals/base_rentals.html" %}
+{% load crispy_forms_tags %}
+
+{% block rentals_title %}{{ title }}{% endblock %}
+
+{% block rentals_content %}
+<div class="card mb-4">
+    <div class="card-header bg-gradient-dark">
+        <h5 class="mb-0">{{ title }}</h5>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            {{ form|crispy }}
+            
+            <div class="d-grid gap-2 mt-3">
+                <button type="submit" class="btn btn-primary">Create Rental</button>
+                <a href="{% url 'rentals:rental_list' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if equipment_id %}
+<div class="alert alert-info">
+    <i class="fas fa-info-circle me-2"></i> After creating the rental, you'll be able to add equipment #{{ equipment_id }} to it.
+</div>
+{% endif %}
+{% endblock %}
