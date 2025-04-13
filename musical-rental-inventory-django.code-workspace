@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../musical-rental-inventory-api"
+		},
+		{
+			"path": "../musical-rental-inventory-infra"
+		}
+	],
+	"settings": {}
+}
