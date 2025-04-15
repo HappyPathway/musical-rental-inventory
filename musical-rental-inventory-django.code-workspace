@@ -8,6 +8,9 @@
 		},
 		{
 			"path": "../musical-rental-inventory-infra"
+		},
+		{
+			"path": "../musical-rental-inventory-spa"
 		}
 	],
 	"settings": {}
